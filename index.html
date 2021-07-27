@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="/fonts/dmsans.css" />
+    <link rel="stylesheet" href="/fonts/firamono.css" />
+    <link rel="stylesheet" href="/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body class="body wrapper">
+    <div id="app"></div>
+    <header class="header">
+      <section class="header-wrapper"></section>
+      <div class="header-logo">
+        <a href="header-logo-link" src="/">
+          <img src="/logo.svg" />
+        </a>
+      </div>
+      <div class="header-log">
+        <div class="header-log-verison">version: 0.1.5</div>
+        <div class="header-log-multithread">multithreading: false</div>
+      </div>
+    </header>
+    <main class="main">
+      <h1 class="main-title">
+        Offline documents<br />
+        recogniton demostration
+      </h1>
+      <section class="main-wrapper">
+        <div class="main-preview">
+          <h2>Camera or image</h2>
+          <div class="main-preview-body">
+            <div class="main-preview-select">
+              <span id="s123">
+                <svg
+                  width="22"
+                  height="14"
+                  viewBox="0 0 22 14"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2 2L11 11L20 2"
+                    stroke="black"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </span>
+              <select>
+                <option>Cards</option>
+                <option>Barcode</option>
+                <option>All rus docs</option>
+              </select>
+            </div>
+            <div class="main-preview-log">
+              <section class="main-preview__log custom--scroll">
+                <p>await camera....</p>
+                <p>await wasm emgine.....</p>
+                <p>await wasm emgine.....</p>
+                <p>await wasm emgine.....</p>
+                <p>await wasm emgine.....</p>
+                <p>await wasm emgine.....</p>
+                <p>await wasm emgine.....</p>
+              </section>
+            </div>
+            <canvas class="js-main-canvas main-canvas"></canvas>
+            <video class="js-main-video main-video"></video>
+          </div>
+        </div>
+        <div class="main-result">
+          <h2>Result</h2>
+          <div class="main-result-body">
+            <div class="main-result-container">
+              <div class="main-result-img">
+                <div class="data-image">
+                  <svg
+                    width="114"
+                    height="144"
+                    viewBox="0 0 114 144"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="114" height="144" fill="#1B414D" />
+                  </svg>
+
+                  <div class="data-image-fieldname">photo</div>
+                </div>
+                <div class="data-image">
+                  <svg
+                    width="114"
+                    height="80"
+                    viewBox="0 0 114 80"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="114" height="144" fill="#1B414D" />
+                  </svg>
+                  <div class="data-image-fieldname">main</div>
+                </div>
+                <div class="data-image">
+                  <svg
+                    width="114"
+                    height="80"
+                    viewBox="0 0 114 80"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="114" height="144" fill="#1B414D" />
+                  </svg>
+                  <div class="data-image-fieldname">main-second</div>
+                </div>
+              </div>
+              <div class="main-result-data custom--scroll">
+                <div class="data-el data-el--not-accepted">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 8 8"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="4" cy="4" r="4" fill="" />
+                  </svg>
+
+                  <div class="data-el-value">Гарри</div>
+                  <div class="data-el-fieldname">name</div>
+                </div>
+                <div class="data-el data-el--accepted">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 8 8"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="4" cy="4" r="4" fill="" />
+                  </svg>
+                  <div class="data-el-value">Поттер</div>
+                  <div class="data-el-fieldname">surename</div>
+                </div>
+                <div class="data-el data-el--not-sure">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 8 8"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="4" cy="4" r="4" fill="" />
+                  </svg>
+                  <div class="data-el-value">Волондемортович</div>
+                  <div class="data-el-fieldname">patronymic</div>
+                </div>
+                <div class="data-el">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 8 8"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="4" cy="4" r="4" fill="" />
+                  </svg>
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 8 8"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="4" cy="4" r="4" fill="" />
+                  </svg>
+                  <div class="data-el-value">15.08.1970</div>
+                  <div class="data-el-fieldname">birthday</div>
+                </div>
+                <div class="data-el">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 8 8"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="4" cy="4" r="4" fill="" />
+                  </svg>
+                  <div class="data-el-value data-el--not-accepted">
+                    РЕСП. ДАГЕСТАН
+                  </div>
+                  <div class="data-el-fieldname">place</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+                <div class="data-el">
+                  <div class="data-el-value">7354545454</div>
+                  <div class="data-el-fieldname">number</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="button-group">
+        <button class="btn btn-capture">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.79999 12 8.79999C10.2327 8.79999 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
+              fill="#192C39"
+            />
+            <path
+              d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
+              fill="#192C39"
+            />
+          </svg>
+
+          Start capture
+        </button>
+        <button class="btn btn-upload">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 16H15V10H19L12 3L5 10H9V16ZM5 18H19V20H5V18Z"
+              fill="#192C39"
+            />
+          </svg>
+          Upload
+        </button>
+      </section>
+    </main>
+    <footer></footer>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
