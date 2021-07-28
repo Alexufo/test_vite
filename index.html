@@ -31,7 +31,7 @@
       <section class="main-wrapper">
         <div class="main-preview">
           <h2>Camera or image</h2>
-          <div class="main-preview-body">
+          <div class="main-body">
             <div class="main-preview-select">
               <span id="s123">
                 <svg
@@ -66,14 +66,19 @@
                 <p>await wasm emgine.....</p>
               </section>
             </div>
+            <!-- requerd 3 html elements. 
+              1) video. display:none; 
+              2) canvas for capture video
+              3) canvas for overlay 
+            -->
+            <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
             <canvas class="js-main-canvas main-canvas"></canvas>
-            <video class="js-main-video main-video"></video>
           </div>
         </div>
         <div class="main-result">
           <h2>Result</h2>
-          <div class="main-result-body">
-            <div class="main-result-container">
+          <div class="main-body">
+            <div class="main-result-container custom--scroll">
               <div class="main-result-img">
                 <div class="data-image">
                   <svg
@@ -113,7 +118,7 @@
                   <div class="data-image-fieldname">main-second</div>
                 </div>
               </div>
-              <div class="main-result-data custom--scroll">
+              <div class="main-result-data">
                 <div class="data-el data-el--not-accepted">
                   <svg
                     width="8"
@@ -233,7 +238,7 @@
         </div>
       </section>
       <section class="button-group">
-        <button class="btn btn-capture">
+        <button class="js-btn-capture btn btn-capture">
           <svg
             width="24"
             height="24"
@@ -253,7 +258,7 @@
 
           Start capture
         </button>
-        <button class="btn btn-upload">
+        <button class="js-btn-upload btn btn-upload">
           <svg
             width="24"
             height="24"

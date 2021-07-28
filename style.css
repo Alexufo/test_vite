@@ -116,26 +116,24 @@ h2 {
     justify-content: space-between;
     align-items: baseline;
     margin: 0 -1rem;
-
     > div {
-      //width: calc(50% - 2rem);
       padding: 0 1rem;
-
-      > div[class$="-body"] {
-        padding: var(--div-body-p);
-        border-radius: var(--div-radius-1);
-      }
     }
   }
 
+  &-body {
+    padding: 0 1rem;
+    box-sizing: border-box;
+    padding: var(--div-body-p);
+    background-color: var(--c-light-5);
+    border-radius: var(--div-radius-1);
+    position: relative;
+    max-width: 640px;
+    max-height: 480px;
+    overflow: hidden;
+  }
   &-preview {
     flex-basis: 100%;
-    &-body {
-      background-color: black;
-      position: relative;
-      max-width: 640px;
-      max-height: 480px;
-    }
 
     &-select {
       position: absolute;
@@ -195,14 +193,6 @@ h2 {
       }
     }
   }
-
-  &-canvas {
-  }
-
-  &-video {
-    padding-top: 56.25%; /* ratio 4/3 */
-  }
-
   &-result {
     font-family: "Fira Mono", sans-serif;
     flex-basis: 100%;
@@ -212,6 +202,7 @@ h2 {
 
     &-container {
       display: flex;
+      max-height: calc(480px - var(--div-body-p) * 2);
     }
 
     &-img {
@@ -224,6 +215,15 @@ h2 {
       max-height: 50ch;
       padding-right: 1rem;
     }
+  }
+  &-canvas {
+    margin: calc(var(--div-body-p) * -1);
+    &-overlay {
+      position: absolute;
+    }
+  }
+  &-video {
+    display: none;
   }
 }
 
