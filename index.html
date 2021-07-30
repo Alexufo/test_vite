@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="/fonts/firamono.css" />
     <link rel="stylesheet" href="/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+
+    <title>Wasm App</title>
   </head>
   <body class="body wrapper">
-    <div id="app"></div>
     <header class="header">
       <section class="header-wrapper"></section>
       <div class="header-logo">
@@ -32,8 +32,12 @@
         <div class="main-preview">
           <h2>Camera or image</h2>
           <div class="main-body">
+            <div class="lds-ripple">
+              <div></div>
+              <div></div>
+            </div>
             <div class="main-preview-select">
-              <span id="s123">
+              <span>
                 <svg
                   width="22"
                   height="14"
@@ -55,21 +59,16 @@
                 <option>All rus docs</option>
               </select>
             </div>
-            <div class="main-preview-log">
+            <div class="main-preview-log" v-if="_log.logger.length" v-scope>
               <section class="main-preview__log custom--scroll">
-                <p>await camera....</p>
-                <p>await wasm emgine.....</p>
-                <p>await wasm emgine.....</p>
-                <p>await wasm emgine.....</p>
-                <p>await wasm emgine.....</p>
-                <p>await wasm emgine.....</p>
-                <p>await wasm emgine.....</p>
+                <template v-for="item in _log.logger">
+                  <p>{{ item }}</p>
+                </template>
               </section>
             </div>
-            <!-- requerd 3 html elements. 
-              1) video. display:none; 
-              2) canvas for capture video
-              3) canvas for overlay 
+            <!-- requerd 2 html elements. 
+              1) canvas for capture video
+              2) canvas for overlay drawing if needed
             -->
             <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
             <canvas class="js-main-canvas main-canvas"></canvas>
@@ -237,46 +236,104 @@
           </div>
         </div>
       </section>
-      <section class="button-group">
-        <button class="js-btn-capture btn btn-capture">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.79999 12 8.79999C10.2327 8.79999 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
-              fill="#192C39"
-            />
-            <path
-              d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
-              fill="#192C39"
-            />
-          </svg>
+      <section class="button-group" v-scope>
+        <button v-on:click="startCapture()" class="btn btn-capture">
+          <span>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.79999 12 8.79999C10.2327 8.79999 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
+                fill="#192C39"
+              />
+              <path
+                d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
+                fill="#192C39"
+              />
+            </svg>
 
-          Start capture
+            Start capture
+          </span>
         </button>
-        <button class="js-btn-upload btn btn-upload">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 16H15V10H19L12 3L5 10H9V16ZM5 18H19V20H5V18Z"
-              fill="#192C39"
-            />
-          </svg>
-          Upload
+        <button class="js-btn-upload btn btn-upload" v-scope>
+          <span v-if="!_loader.wasmReady">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 38 38"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient
+                  x1="8.042%"
+                  y1="0%"
+                  x2="65.682%"
+                  y2="23.865%"
+                  id="a"
+                >
+                  <stop stop-color="black" stop-opacity="0" offset="0%" />
+                  <stop
+                    stop-color="black"
+                    stop-opacity=".631"
+                    offset="63.146%"
+                  />
+                  <stop stop-color="black" offset="100%" />
+                </linearGradient>
+              </defs>
+              <g fill="none" fill-rule="evenodd">
+                <g transform="translate(1 1)">
+                  <path
+                    d="M36 18c0-9.94-8.06-18-18-18"
+                    id="Oval-2"
+                    stroke="url(#a)"
+                    stroke-width="2"
+                  >
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      from="0 18 18"
+                      to="360 18 18"
+                      dur="0.9s"
+                      repeatCount="indefinite"
+                    />
+                  </path>
+                  <circle fill="black" cx="36" cy="18" r="1">
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      from="0 18 18"
+                      to="360 18 18"
+                      dur="0.9s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+                </g>
+              </g>
+            </svg>
+          </span>
+          <span v-if="_loader.wasmReady">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 16H15V10H19L12 3L5 10H9V16ZM5 18H19V20H5V18Z"
+                fill="#192C39"
+              />
+            </svg>
+            Upload
+          </span>
         </button>
       </section>
     </main>
     <footer></footer>
-
     <script type="module" src="/main.js"></script>
   </body>
 </html>

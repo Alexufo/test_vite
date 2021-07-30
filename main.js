@@ -2,13 +2,36 @@
 /* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 
+// only for UI interaction
+import { createApp, reactive } from "/petite-vue.es.js";
+
+
+const _log = reactive({
+    logger: [],
+    push(string) {
+        console.log(string);
+        let t = new Date().toLocaleTimeString();
+        this.logger.unshift(t + " | " + string);
+        // console.log(this.logger);
+    }
+});
+const _loader = reactive({
+    wasmReady: false,
+    imageProcess: false
+
+});
+createApp({
+    _log,
+    _loader,
+    startCapture() {
+        _log.push('Capture video stream...');
+        SEWorker.postMessage(frameData());
+    }
+}).mount();
+
 // import main worker. Workers allow us do not block main thread during recognition.
 const SEWorker = new Worker('./idengine_worker.js');
 
-// Required 2 html elements.
-// canvas for caprture video, canvas for overlay drawing
-
-//const video = document.querySelector('.js-main-video');
 const canvas = document.querySelector('.js-main-canvas');
 const overlayCanvas = document.querySelector('.js-overlay-canvas');
 
@@ -22,41 +45,45 @@ let currentResult;
 async function main() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error(
-            'Browser API getUserMedia not available',
+            'Browser API getUserMedia not available'
         );
     }
 
+    // video tag is nessedory to get video from webcam
     const video = document.createElement('video');
 
-    video.autoplay = true;
-
     async function setupCamera() {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: {
-                width:
-                {
-                    min: 640,
-                    max: 1280, // may be slow? Looks like 640 is ok for most cases.
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: {
+                    width:
+                    {
+                        exact: 640
+                        //min: 640,
+                        //max: 1280, // may be slow? Looks like 640 is ok for most cases.
+                    },
+                    height:
+                    {
+                        exact: 480
+                        //min: 480,
+                        //max: 720,
+                    },
                 },
-                height:
-                {
-                    min: 480,
-                    max: 720,
-                },
-            },
-            facingMode: 'environment',
-        });
+                facingMode: 'environment',
+            });
 
+            video.srcObject = stream;
 
+            return new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    resolve(video);
+                };
+            });
 
-        video.srcObject = stream;
-
-        return new Promise((resolve) => {
-            video.onloadedmetadata = () => {
-                resolve(video);
-            };
-        });
+        } catch (err) {
+            console.error('There is not access to webcam: ' + err);
+        }
     }
 
     // await of camera init
@@ -65,15 +92,11 @@ async function main() {
 
     // create canvas and run stream from video element
     const { videoWidth, videoHeight } = video;
-    video.width = videoWidth;
-    video.height = videoHeight;
-    canvas.width = videoWidth;
-    canvas.height = videoHeight;
+
+    canvas.width = overlayCanvas.width = videoWidth;
+    canvas.height = overlayCanvas.height = videoHeight;
 
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    overlayCanvas.width = videoWidth;
-    overlayCanvas.height = videoHeight;
 
     function animate() {
         canvas.getContext('2d', { alpha: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -125,16 +148,29 @@ function drawQuads(cleanCanvas = false) {
 
 SEWorker.onmessage = function (msg) {
     switch (msg.data.requestType) {
-        case 'ready':
-            console.log('Ready');
+        case 'wasmEvent':
+            if (msg.data.data === 'started') {
+                console.log('Wasm download and compiling...');
+                _log.push('Wasm download and compiling...');
+
+            }
+            if (msg.data.data === 'ready') {
+                console.log('Ready');
+                _log.push('Ready');
+                _loader.wasmReady = true;
+            }
             break;
         case 'result':
             currentResult = msg.data;
 
             // timeout
-            if (currentResult.data === 0) {
-                console.log('Document Not found');
+            if (Object.keys(currentResult.data).length === 0) {
+
+                _log.push('Document Not found 😕');
+                SEWorker.postMessage({ requestType: 'reset' });
+                return
             }
+            _log.push('Document Ready 👍');
             // get result
             console.log(currentResult);
 
@@ -147,6 +183,7 @@ SEWorker.onmessage = function (msg) {
             break;
         case 'FeedMeMore':
             console.log('Feed Me More!! 🥝');
+            _log.push('Send image...');
             currentResult = msg.data;
             // draw only for
             drawQuads();
@@ -158,9 +195,6 @@ SEWorker.onmessage = function (msg) {
 
 
 
-startButton.addEventListener('click', (event) => {
-    SEWorker.postMessage(frameData());
-});
 
 fileSelector.addEventListener('change', (event) => {
     const file = event.target.files[0];

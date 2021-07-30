@@ -1,5 +1,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
+postMessage({ requestType: 'wasmEvent', data: 'started' });
+
 importScripts('./../bindings/idengine_wasm.js');
 
 const IdEngineConfig = {
@@ -15,7 +17,7 @@ SmartIDEngine().then((SmartIDEngine) => {
   // console.log(SmartIDEngine);
 
   // emit wasm ready
-  postMessage({ requestType: 'ready' });
+  postMessage({ requestType: 'wasmEvent', data: 'ready' });
 
   const sessionSettings = engine.CreateSessionSettings();
   sessionSettings.AddEnabledDocumentTypes(IdEngineConfig.docTypes);
