@@ -1,6 +1,6 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
-postMessage({ requestType: 'wasmEvent', data: 'started' });
+postMessage({ requestType: 'wasmEvent', data: { type: 'started' } });
 
 importScripts('./../bindings/idengine_wasm.js');
 
@@ -17,7 +17,7 @@ SmartIDEngine().then((SmartIDEngine) => {
   // console.log(SmartIDEngine);
 
   // emit wasm ready
-  postMessage({ requestType: 'wasmEvent', data: 'ready' });
+  postMessage({ requestType: 'wasmEvent', data: { type: 'ready' } });
 
   const sessionSettings = engine.CreateSessionSettings();
   sessionSettings.AddEnabledDocumentTypes(IdEngineConfig.docTypes);
@@ -29,16 +29,22 @@ SmartIDEngine().then((SmartIDEngine) => {
       return;
     }
 
-    // get dynamic key
-    const dynKey = spawnedSession.GetActivationRequest();
-    const request = new XMLHttpRequest();
-    request.open('POST', IdEngineConfig.activationUrl, false); // false for sync request
-    request.send(dynKey);
+    try {
+      // get dynamic key
+      const dynKey = spawnedSession.GetActivationRequest();
+      const request = new XMLHttpRequest();
+      request.open('POST', IdEngineConfig.activationUrl, false); // false for sync request
+      request.send(dynKey);
 
-    if (request.status === 200 && request.responseText.length > 0) {
-      spawnedSession.Activate(request.responseText); // sesson activation
-    } else {
-      throw Error('something wrong with activation server');
+      if (request.status === 200 && request.responseText.length > 0) {
+        spawnedSession.Activate(request.responseText); // sesson activation
+      } else {
+        postMessage({ requestType: 'wasmEvent', data: { type: 'error', desc: 'something wrong with activation server' } });
+        throw Error('something wrong with activation server');
+      }
+
+    } catch (error) {
+      postMessage({ requestType: 'wasmEvent', data: { type: 'error', desc: error } });
     }
   }
 

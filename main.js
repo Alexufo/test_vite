@@ -149,15 +149,18 @@ function drawQuads(cleanCanvas = false) {
 SEWorker.onmessage = function (msg) {
     switch (msg.data.requestType) {
         case 'wasmEvent':
-            if (msg.data.data === 'started') {
+            if (msg.data.data.type === 'started') {
                 console.log('Wasm download and compiling...');
                 _log.push('Wasm download and compiling...');
 
             }
-            if (msg.data.data === 'ready') {
-                console.log('Ready');
-                _log.push('Ready');
+            if (msg.data.data.type === 'ready') {
+                _log.push('Wasm ready');
                 _loader.wasmReady = true;
+            }
+            if (msg.data.data.type === 'error') {
+                _log.push('Error: ' + msg.data.data.desc);
+
             }
             break;
         case 'result':
