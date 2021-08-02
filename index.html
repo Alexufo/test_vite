@@ -5,6 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="/fonts/dmsans.css" />
     <link rel="stylesheet" href="/fonts/firamono.css" />
+    <link rel="stylesheet" href="/normalize.min.css" />
     <link rel="stylesheet" href="/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -19,8 +20,8 @@
         </a>
       </div>
       <div class="header-log">
-        <div class="header-log-verison">version: 0.1.5</div>
-        <div class="header-log-multithread">multithreading: false</div>
+        <div class="header-log-verison">version:</div>
+        <div class="header-log-multithread">multithreading:</div>
       </div>
     </header>
     <main class="main">
@@ -66,201 +67,55 @@
                 </template>
               </section>
             </div>
-            <!-- requerd 2 html elements. 
+            <!--  
               1) canvas for capture video
               2) canvas for overlay drawing if needed
             -->
             <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
+            <!--<img class="main-img" v-scope :src="_loader.imgSrc" /> -->
             <canvas class="js-main-canvas main-canvas"></canvas>
           </div>
         </div>
         <div class="main-result">
           <h2>Result</h2>
-          <div class="main-body">
-            <div class="main-result-container custom--scroll">
+          <div class="main-body main-body--result">
+            <div class="main-result-container custom--scroll" v-scope>
               <div class="main-result-img">
-                <div class="data-image">
-                  <svg
-                    width="114"
-                    height="144"
-                    viewBox="0 0 114 144"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <rect width="114" height="144" fill="#1B414D" />
-                  </svg>
-
-                  <div class="data-image-fieldname">photo</div>
-                </div>
-                <div class="data-image">
-                  <svg
-                    width="114"
-                    height="80"
-                    viewBox="0 0 114 80"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <rect width="114" height="144" fill="#1B414D" />
-                  </svg>
-                  <div class="data-image-fieldname">main</div>
-                </div>
-                <div class="data-image">
-                  <svg
-                    width="114"
-                    height="80"
-                    viewBox="0 0 114 80"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <rect width="114" height="144" fill="#1B414D" />
-                  </svg>
-                  <div class="data-image-fieldname">main-second</div>
-                </div>
+                <template v-for="(value, name) in _resultData.images">
+                  <div class="data-image">
+                    <div class="data-image-container">
+                      <img :src="`data:image/jpg;base64,${value}`" />
+                    </div>
+                    <div class="data-image-fieldname">{{ name }}</div>
+                  </div>
+                </template>
               </div>
               <div class="main-result-data">
-                <div class="data-el data-el--not-accepted">
-                  <svg
-                    width="8"
-                    height="8"
-                    viewBox="0 0 8 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="4" cy="4" r="4" fill="" />
-                  </svg>
+                <template v-for="(value, name) in _resultData.data">
+                  <div class="data-el data-el--accepted">
+                    <svg
+                      width="8"
+                      height="8"
+                      viewBox="0 0 8 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle cx="4" cy="4" r="4" fill="" />
+                    </svg>
 
-                  <div class="data-el-value">Гарри</div>
-                  <div class="data-el-fieldname">name</div>
-                </div>
-                <div class="data-el data-el--accepted">
-                  <svg
-                    width="8"
-                    height="8"
-                    viewBox="0 0 8 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="4" cy="4" r="4" fill="" />
-                  </svg>
-                  <div class="data-el-value">Поттер</div>
-                  <div class="data-el-fieldname">surename</div>
-                </div>
-                <div class="data-el data-el--not-sure">
-                  <svg
-                    width="8"
-                    height="8"
-                    viewBox="0 0 8 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="4" cy="4" r="4" fill="" />
-                  </svg>
-                  <div class="data-el-value">Волондемортович</div>
-                  <div class="data-el-fieldname">patronymic</div>
-                </div>
-                <div class="data-el">
-                  <svg
-                    width="8"
-                    height="8"
-                    viewBox="0 0 8 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="4" cy="4" r="4" fill="" />
-                  </svg>
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <svg
-                    width="8"
-                    height="8"
-                    viewBox="0 0 8 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="4" cy="4" r="4" fill="" />
-                  </svg>
-                  <div class="data-el-value">15.08.1970</div>
-                  <div class="data-el-fieldname">birthday</div>
-                </div>
-                <div class="data-el">
-                  <svg
-                    width="8"
-                    height="8"
-                    viewBox="0 0 8 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="4" cy="4" r="4" fill="" />
-                  </svg>
-                  <div class="data-el-value data-el--not-accepted">
-                    РЕСП. ДАГЕСТАН
+                    <div class="data-el-value">{{value}}</div>
+                    <div class="data-el-fieldname">{{name}}</div>
                   </div>
-                  <div class="data-el-fieldname">place</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
-                <div class="data-el">
-                  <div class="data-el-value">7354545454</div>
-                  <div class="data-el-fieldname">number</div>
-                </div>
+                </template>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <section class="button-group" v-scope>
-        <button v-on:click="startCapture()" class="btn btn-capture">
-          <span>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.79999 12 8.79999C10.2327 8.79999 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
-                fill="#192C39"
-              />
-              <path
-                d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
-                fill="#192C39"
-              />
-            </svg>
 
-            Start capture
-          </span>
-        </button>
-        <button class="js-btn-upload btn btn-upload" v-scope>
-          <span v-if="!_loader.wasmReady">
+      <section v-show="_loader.wasmReady" class="button-group" v-scope>
+        <button v-on:click="recognizerFrame()" class="btn">
+          <span v-if="!_loader.btn_stream_active">
             <svg
               width="24"
               height="24"
@@ -315,7 +170,85 @@
               </g>
             </svg>
           </span>
-          <span v-if="_loader.wasmReady">
+          <span v-if="_loader.btn_stream_active">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.79999 12 8.79999C10.2327 8.79999 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
+                fill="#192C39"
+              />
+              <path
+                d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
+                fill="#192C39"
+              />
+            </svg>
+
+            Start capture
+          </span>
+        </button>
+
+        <label class="btn" for="select_file" v-scope>
+          <span v-if="!_loader.btn_upload_active">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 38 38"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient
+                  x1="8.042%"
+                  y1="0%"
+                  x2="65.682%"
+                  y2="23.865%"
+                  id="a"
+                >
+                  <stop stop-color="black" stop-opacity="0" offset="0%" />
+                  <stop
+                    stop-color="black"
+                    stop-opacity=".631"
+                    offset="63.146%"
+                  />
+                  <stop stop-color="black" offset="100%" />
+                </linearGradient>
+              </defs>
+              <g fill="none" fill-rule="evenodd">
+                <g transform="translate(1 1)">
+                  <path
+                    d="M36 18c0-9.94-8.06-18-18-18"
+                    id="Oval-2"
+                    stroke="url(#a)"
+                    stroke-width="2"
+                  >
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      from="0 18 18"
+                      to="360 18 18"
+                      dur="0.9s"
+                      repeatCount="indefinite"
+                    />
+                  </path>
+                  <circle fill="black" cx="36" cy="18" r="1">
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      from="0 18 18"
+                      to="360 18 18"
+                      dur="0.9s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+                </g>
+              </g>
+            </svg>
+          </span>
+          <span v-if="_loader.btn_upload_active">
             <svg
               width="24"
               height="24"
@@ -330,7 +263,14 @@
             </svg>
             Upload
           </span>
-        </button>
+        </label>
+        <input
+          v-on:change="recognizeFile($el)"
+          type="file"
+          id="select_file"
+          style="display: none"
+          accept="image/png, image/jpeg"
+        />
       </section>
     </main>
     <footer></footer>

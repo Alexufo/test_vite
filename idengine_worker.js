@@ -12,9 +12,6 @@ const IdEngineConfig = {
 
 SmartIDEngine().then((SmartIDEngine) => {
   const engine = new SmartIDEngine.seIdEngine();
-  // const tt = SmartIDEngine.GetVersion();
-  console.log(engine);
-  // console.log(SmartIDEngine);
 
   // emit wasm ready
   postMessage({ requestType: 'wasmEvent', data: { type: 'ready' } });
@@ -59,10 +56,8 @@ SmartIDEngine().then((SmartIDEngine) => {
     for (let i = 0; i < result.GetTemplateDetectionResultsCount(); i++) {
       //
       const templateResult = result.GetTemplateDetectionResult(i);
-      console.log(templateResult);
       const tmpl = [];
       const q = templateResult.GetQuadrangle();
-      console.log(q);
       tmpl.push(q.GetPoint(0));
       tmpl.push(q.GetPoint(1));
       tmpl.push(q.GetPoint(2));
@@ -100,7 +95,7 @@ SmartIDEngine().then((SmartIDEngine) => {
     return tempData;
   }
 
-  function recognizerFrame(imageData, width, height, imageType) {
+  function recognizerFrame(imageData, width, height) {
     // Frame processing method
     const rawData = imageData.data.buffer;
     const channels = rawData.byteLength / (height * width); // Number of channels
@@ -111,9 +106,8 @@ SmartIDEngine().then((SmartIDEngine) => {
 
     const resultMessage = {
       requestType: 'result',
-      imageType,
-      data: [],
-      images: [],
+      data: {},
+      images: {},
       templateDetection: getTemplateDetection(result),
       templateSegmentation: getTemplateSegmentation(result),
     };
@@ -142,15 +136,14 @@ SmartIDEngine().then((SmartIDEngine) => {
     return resultMessage;
   }
 
-  function recognizeFile(imageData, imageType) {
+  function recognizeFile(imageData) {
     const imgSrc = new SmartIDEngine.seImage(imageData);
 
     const result = spawnedSession.Process(imgSrc);
     const resultMessage = {
       requestType: 'result',
-      imageType,
-      data: [],
-      images: [],
+      data: {},
+      images: {},
       templateDetection: getTemplateDetection(result),
       templateSegmentation: getTemplateSegmentation(result),
     };
@@ -158,9 +151,7 @@ SmartIDEngine().then((SmartIDEngine) => {
     const iterTextFields = result.TextFieldsBegin();
     for (iterTextFields; !iterTextFields.Equals(result.TextFieldsEnd()); iterTextFields.Advance()) {
       const key = iterTextFields.GetKey();
-      console.log(key);
       const field = iterTextFields.GetValue();
-      console.log(field);
       resultMessage.data[key] = field.GetValue().GetFirstString();
     }
 
@@ -175,31 +166,27 @@ SmartIDEngine().then((SmartIDEngine) => {
   }
 
   onmessage = function (msg) {
-    console.log('requestAccepted');
-
     switch (msg.data.requestType) {
       case 'frame':
         checkSession();
-        r = recognizerFrame(
+        result = recognizerFrame(
           msg.data.imageData,
           msg.data.width,
-          msg.data.height,
-          msg.data.requestType,
+          msg.data.height
         );
-        postMessage(r);
+        postMessage(result);
         break;
 
       case 'file':
         checkSession();
-        console.log(msg.data.imageData);
-
-        result = recognizeFile(msg.data.imageData, msg.data.requestType);
+        result = recognizeFile(msg.data.imageData);
         postMessage(result);
         break;
 
       case 'reset':
         spawnedSession.Reset();
-        console.log('Session reset');
+        postMessage({ requestType: 'wasmEvent', data: { type: 'reset' } });
+
       // no default
     }
   };

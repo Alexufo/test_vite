@@ -129,7 +129,7 @@ h2 {
     border-radius: var(--div-radius-1);
     position: relative;
     height: 480px;
-    width: 640px;
+    width: 100%;
     /*max-width: 640px;
     max-height: 480px;*/
     overflow: hidden;
@@ -143,10 +143,15 @@ h2 {
       margin: auto;
       z-index: 100;
     }
-  }
-  &-preview {
-    flex-basis: 100%;
 
+    &--result {
+      width: auto;
+    }
+  }
+
+  &-preview {
+    flex-shrink: 0;
+    flex-basis: 640px;
     &-select {
       position: absolute;
       right: var(--div-body-p);
@@ -184,16 +189,10 @@ h2 {
         width: 100%;
       }
     }
-
     &__log {
       max-height: 2ch;
-      font-family: "Fira Mono", sans-serif;
       transition: all 0.3s ease;
-      &:hover {
-        max-height: 30ch;
-      }
     }
-
     &-log {
       background-color: var(--log-color);
       position: absolute;
@@ -204,18 +203,26 @@ h2 {
       margin: var(--div-body-p);
       border-radius: var(--div-radius-1);
       padding: 1rem;
-
       box-sizing: border-box;
+      font-family: "Fira Mono", sans-serif;
+      &:hover {
+        .main-preview__log {
+          max-height: 30ch;
+        }
+      }
       p {
         margin: 0;
       }
     }
   }
+  &-img {
+    max-width: 100%;
+  }
   &-result {
-    font-family: "Fira Mono", sans-serif;
     flex-basis: 100%;
     &-body {
       background-color: var(--c-light-5);
+      font-family: "Fira Mono", sans-serif;
     }
 
     &-container {
@@ -224,7 +231,6 @@ h2 {
     }
 
     &-img {
-      min-width: 8rem;
       padding-right: 0.8rem;
     }
 
@@ -234,10 +240,12 @@ h2 {
       padding-right: 1rem;
     }
   }
+
   &-canvas {
     margin: calc(var(--div-body-p) * -1);
     position: relative;
     z-index: 500;
+    width: calc(var(--div-body-p) * 2 + 100%);
     &-overlay {
       position: absolute;
       top: 0;
@@ -253,7 +261,17 @@ h2 {
 .data-image {
   padding-bottom: 1rem;
   position: relative;
+  width: 8rem;
+  img {
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  &-container {
+  }
   &-fieldname {
+    padding-top: 0.2rem;
+    margin-bottom: 0.5rem;
     color: var(--c-light);
   }
 }
@@ -261,8 +279,8 @@ h2 {
 .data-el {
   border-bottom: 1px solid var(--c-light-3);
   display: block;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
   position: relative;
 
   svg {
@@ -296,8 +314,9 @@ h2 {
     top: 0.3rem;
   }
   &-value {
-    font-size: 1rem;
+    font-size: 0.8rem;
     padding-left: 1rem;
+    word-break: break-all;
 
     &::before {
       color: green;
@@ -307,7 +326,7 @@ h2 {
   &-fieldname {
     padding-left: 1rem;
     color: var(--c-light-6);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 }
 
@@ -315,6 +334,7 @@ h2 {
   border: none;
   padding: 0.8rem 1.2rem;
   margin-right: 2rem;
+  box-sizing: border-box;
   background: #00b09a;
   border-radius: var(--div-radius-1);
   font-family: var(--font-family);
@@ -325,6 +345,7 @@ h2 {
   cursor: pointer;
   justify-content: center;
   transition: all 0.3s;
+  color: var(--c-light-4);
 
   &:hover {
     background-color: var(--c-main-light);

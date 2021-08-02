@@ -1,10 +1,8 @@
-//import './style.css';
 /* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 
 // only for UI interaction
 import { createApp, reactive } from "/petite-vue.es.js";
-
 
 const _log = reactive({
     logger: [],
@@ -15,32 +13,67 @@ const _log = reactive({
         // console.log(this.logger);
     }
 });
-const _loader = reactive({
-    wasmReady: false,
-    imageProcess: false
 
+const _loader = reactive({
+    systemReady() {
+        this.wasmReady = true;
+        this.btn_upload_active = true;
+        this.btn_stream_active = true;
+        return;
+    },
+    wasmReady: false,
+    imageProcess: false,
+    btn_stream_active: true,
+    btn_upload_active: true,
+    imgSrc: '',
 });
+
+const _resultData = reactive({
+    images: null,
+    data: null
+});
+
+
 createApp({
     _log,
     _loader,
-    startCapture() {
+    _resultData,
+    recognizerFrame() {
         _log.push('Capture video stream...');
-        SEWorker.postMessage(frameData());
+        SEWorker.postMessage(requestFrame());
+    },
+    recognizeFile(event) {
+
+        const file = event.files[0];
+
+        if (file.type && file.type.indexOf('image') === -1) {
+            _log.push('File is not an image.', file.type, file);
+            return;
+        }
+
+        _loader.imgSrc = URL.createObjectURL(file);
+
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+
+            SEWorker.postMessage({
+                requestType: 'file',
+                imageData: event.target.result,
+            });
+        });
+        reader.readAsArrayBuffer(file);
     }
 }).mount();
 
-// import main worker. Workers allow us do not block main thread during recognition.
+
+
+
+// main worker. Workers allow us do not block main thread during recognition.
+
 const SEWorker = new Worker('./idengine_worker.js');
 
 const canvas = document.querySelector('.js-main-canvas');
 const overlayCanvas = document.querySelector('.js-overlay-canvas');
-
-const fileSelector = document.querySelector('.js-btn-upload');
-const startButton = document.querySelector('.js-btn-capture');
-
-let currentResult;
-
-
 
 async function main() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -102,16 +135,16 @@ async function main() {
         canvas.getContext('2d', { alpha: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
         requestAnimationFrame(animate);
     }
-
-    // console.log(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height));
     animate();
 }
 
 main();
 
-function drawQuads(cleanCanvas = false) {
-    // console.log("currentResult.imageType ", currentResult.imageType)
+
+function drawQuads(currentResult, cleanCanvas = false) {
+
     overlayCanvas.getContext('2d').clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
     if (cleanCanvas) {
         return;
     }
@@ -143,86 +176,84 @@ function drawQuads(cleanCanvas = false) {
             overlayCanvas.getContext('2d').strokeStyle = 'green';
             overlayCanvas.getContext('2d').stroke(path);
         }
+
     }
+    // debug drawing
+    console.log('%c ', `line-height:8rem;padding-right:25%;background:url(${overlayCanvas.toDataURL('image/jpeg', 1.0)}) top left / contain no-repeat`);
+
 }
 
 SEWorker.onmessage = function (msg) {
     switch (msg.data.requestType) {
+
+        // events from wasm worker
         case 'wasmEvent':
-            if (msg.data.data.type === 'started') {
-                console.log('Wasm download and compiling...');
-                _log.push('Wasm download and compiling...');
 
-            }
-            if (msg.data.data.type === 'ready') {
-                _log.push('Wasm ready');
-                _loader.wasmReady = true;
-            }
-            if (msg.data.data.type === 'error') {
-                _log.push('Error: ' + msg.data.data.desc);
-
-            }
+            wasmEmitter(msg.data.data);
             break;
+
+        // processing result 
         case 'result':
-            currentResult = msg.data;
+            let currentResult = msg.data;
 
-            // timeout
+            // timeout event
             if (Object.keys(currentResult.data).length === 0) {
-
                 _log.push('Document Not found 😕');
                 SEWorker.postMessage({ requestType: 'reset' });
                 return
             }
+            // push to UI
+            // hack for file response. Should be fixed
+            if (typeof currentResult.images === 'string') {
+                _resultData.images = { 'unknown': currentResult.images };
+            } else {
+                _resultData.images = currentResult.images;
+            }
+            _resultData.data = currentResult.data;
+
             _log.push('Document Ready 👍');
             // get result
             console.log(currentResult);
 
             // Clear overlay canvas
-            drawQuads(true);
+            drawQuads(null, true);
 
             // reset session on result. Overwise you will always get latest document on every request.
             SEWorker.postMessage({ requestType: 'reset' });
 
             break;
+        // providing more images for recognition
         case 'FeedMeMore':
             console.log('Feed Me More!! 🥝');
             _log.push('Send image...');
-            currentResult = msg.data;
-            // draw only for
-            drawQuads();
-            SEWorker.postMessage(frameData());
+
+            drawQuads(msg.data);
+            SEWorker.postMessage(requestFrame());
             break;
         // no default
     }
 };
 
-
-
-
-fileSelector.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-
-    if (file.type && file.type.indexOf('image') === -1) {
-        console.log('File is not an image.', file.type, file);
-        return;
+function wasmEmitter(evenType) {
+    switch (evenType.type) {
+        case 'started':
+            _log.push('Wasm download and compiling...');
+            break;
+        case 'ready':
+            _log.push('Wasm ready 🟢');
+            _loader.systemReady();
+            break;
+        case 'error':
+            _log.push('Error: ' + evenType.desc);
+            break;
+        case 'reset':
+            _log.push('--- Session Reset ---');
+            break;
+        // no default
     }
-    const img = new Image();
-    img.onload = function () {
+}
 
-    };
-    img.src = URL.createObjectURL(file);
-    const reader = new FileReader();
-    reader.addEventListener('load', (event) => {
-        console.log(event.target.result);
-        SEWorker.postMessage({
-            requestType: 'file',
-            imageData: event.target.result,
-        });
-    });
-    reader.readAsArrayBuffer(file);
-});
-
-function frameData() {
+function requestFrame() {
 
     // Show requested images by the wasm
     console.log('%c ', `line-height:8rem;padding-right:25%;background:url(${canvas.toDataURL('image/jpeg', 1.0)}) top left / contain no-repeat`);

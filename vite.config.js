@@ -1,8 +1,7 @@
-/**
- * @type {import('vite').UserConfig}
- */
+
 
 import crossOriginIsolation from 'vite-plugin-cross-origin-isolation';
+import eslintPlugin from '@nabla/vite-plugin-eslint';
 
 export default {
   server: {
@@ -13,7 +12,8 @@ export default {
   },
   plugins: [
     // other plugins...
-    crossOriginIsolation()
+    crossOriginIsolation(),
+    eslintPlugin()
   ],
 
   build: {
