@@ -17,14 +17,15 @@ const _log = reactive({
 const _loader = reactive({
     systemReady() {
         this.wasmReady = true;
-        this.btn_upload_active = true;
-        this.btn_stream_active = true;
+        //btn_frame_active: true,
+        // btn_file_active: true,
         return;
     },
     wasmReady: false,
     imageProcess: false,
-    btn_stream_active: true,
-    btn_upload_active: true,
+    btn_frame_active: false,
+    btn_file_active: false,
+    wasmVersion: 'waiting...',
     imgSrc: '',
 });
 
@@ -41,9 +42,10 @@ createApp({
     recognizerFrame() {
         _log.push('Capture video stream...');
         SEWorker.postMessage(requestFrame());
+        _loader.btn_frame_active = true;
     },
     recognizeFile(event) {
-
+        _loader.btn_file_active = true;
         const file = event.files[0];
 
         if (file.type && file.type.indexOf('image') === -1) {
@@ -51,7 +53,7 @@ createApp({
             return;
         }
 
-        _loader.imgSrc = URL.createObjectURL(file);
+        //_loader.imgSrc = URL.createObjectURL(file);
 
         const reader = new FileReader();
         reader.addEventListener('load', (event) => {
@@ -158,7 +160,7 @@ function drawQuads(currentResult, cleanCanvas = false) {
             path.lineTo(templatePoints[3].x, templatePoints[3].y);
             path.lineTo(templatePoints[0].x, templatePoints[0].y);
 
-            overlayCanvas.getContext('2d').lineWidth = 1;
+            overlayCanvas.getContext('2d').lineWidth = 2;
             overlayCanvas.getContext('2d').strokeStyle = 'red';
             overlayCanvas.getContext('2d').stroke(path);
         }
@@ -172,7 +174,7 @@ function drawQuads(currentResult, cleanCanvas = false) {
             path.lineTo(templatePoints[2].x, templatePoints[2].y);
             path.lineTo(templatePoints[3].x, templatePoints[3].y);
             path.lineTo(templatePoints[0].x, templatePoints[0].y);
-            overlayCanvas.getContext('2d').lineWidth = 1;
+            overlayCanvas.getContext('2d').lineWidth = 2;
             overlayCanvas.getContext('2d').strokeStyle = 'green';
             overlayCanvas.getContext('2d').stroke(path);
         }
@@ -193,9 +195,9 @@ SEWorker.onmessage = function (msg) {
             break;
 
         // processing result 
-        case 'result':
+        case 'resultFrame':
             let currentResult = msg.data;
-
+            _loader.btn_frame_active = false;
             // timeout event
             if (Object.keys(currentResult.data).length === 0) {
                 _log.push('Document Not found 😕');
@@ -203,12 +205,8 @@ SEWorker.onmessage = function (msg) {
                 return
             }
             // push to UI
-            // hack for file response. Should be fixed
-            if (typeof currentResult.images === 'string') {
-                _resultData.images = { 'unknown': currentResult.images };
-            } else {
-                _resultData.images = currentResult.images;
-            }
+
+            _resultData.images = currentResult.images;
             _resultData.data = currentResult.data;
 
             _log.push('Document Ready 👍');
@@ -217,6 +215,37 @@ SEWorker.onmessage = function (msg) {
 
             // Clear overlay canvas
             drawQuads(null, true);
+
+            // reset session on result. Overwise you will always get latest document on every request.
+            SEWorker.postMessage({ requestType: 'reset' });
+
+            break;
+        // processing result for file
+        case 'resultFile':
+            let currentResultFile = msg.data;
+            _loader.btn_file_active = false;
+
+            // timeout event
+            if (Object.keys(currentResultFile.data).length === 0) {
+                _log.push('Document Not found 😕');
+                SEWorker.postMessage({ requestType: 'reset' });
+                return
+            }
+            // push to UI
+            // hack for file response. Should be fixed
+            if (typeof currentResultFile.images === 'string') {
+                _resultData.images = { 'unknown': currentResultFile.images };
+            } else {
+                _resultData.images = currentResultFile.images;
+            }
+            _resultData.data = currentResultFile.data;
+
+            _log.push('Document Ready 👍');
+            // get result
+            console.log(currentResultFile);
+
+            // Clear overlay canvas
+            drawQuads(currentResultFile);
 
             // reset session on result. Overwise you will always get latest document on every request.
             SEWorker.postMessage({ requestType: 'reset' });
@@ -245,6 +274,10 @@ function wasmEmitter(evenType) {
             break;
         case 'error':
             _log.push('Error: ' + evenType.desc);
+            break;
+        case 'version':
+            _loader.wasmVersion = evenType.desc;
+            _log.push('Version: ' + evenType.desc);
             break;
         case 'reset':
             _log.push('--- Session Reset ---');

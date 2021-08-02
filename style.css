@@ -10,9 +10,7 @@
   --c-light-3: #2a4c55;
   --c-light-4: #1c2a2d;
   --c-light-5: #0d262e;
-
   --log-color: rgba(22, 39, 45, 0.9);
-
   --c-accept: #7dca30;
   --c-not-accept: red;
   --c-not-sure: #ffcd00;
@@ -25,6 +23,7 @@ body {
   font-family: var(--font-family);
   background: var(--background);
   color: var(--c-fonts);
+  height: 100vh;
 }
 a,
 select {
@@ -251,6 +250,7 @@ h2 {
       top: 0;
       left: 0;
       z-index: 1500;
+      width: 100%;
     }
   }
   &-video {
@@ -282,9 +282,6 @@ h2 {
   margin-bottom: 0.5rem;
   padding-bottom: 0.5rem;
   position: relative;
-
-  svg {
-  }
 
   &--accepted {
     svg {

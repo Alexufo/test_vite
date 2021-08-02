@@ -19,8 +19,8 @@
           <img src="/logo.svg" />
         </a>
       </div>
-      <div class="header-log">
-        <div class="header-log-verison">version:</div>
+      <div class="header-log" v-scope>
+        <div class="header-log-verison">version: {{_loader.wasmVersion}}</div>
         <div class="header-log-multithread">multithreading:</div>
       </div>
     </header>
@@ -72,7 +72,6 @@
               2) canvas for overlay drawing if needed
             -->
             <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
-            <!--<img class="main-img" v-scope :src="_loader.imgSrc" /> -->
             <canvas class="js-main-canvas main-canvas"></canvas>
           </div>
         </div>
@@ -115,7 +114,7 @@
 
       <section v-show="_loader.wasmReady" class="button-group" v-scope>
         <button v-on:click="recognizerFrame()" class="btn">
-          <span v-if="!_loader.btn_stream_active">
+          <span v-if="_loader.btn_frame_active">
             <svg
               width="24"
               height="24"
@@ -170,7 +169,7 @@
               </g>
             </svg>
           </span>
-          <span v-if="_loader.btn_stream_active">
+          <span v-if="!_loader.btn_frame_active">
             <svg
               width="24"
               height="24"
@@ -193,7 +192,7 @@
         </button>
 
         <label class="btn" for="select_file" v-scope>
-          <span v-if="!_loader.btn_upload_active">
+          <span v-if="_loader.btn_file_active">
             <svg
               width="24"
               height="24"
@@ -248,7 +247,7 @@
               </g>
             </svg>
           </span>
-          <span v-if="_loader.btn_upload_active">
+          <span v-if="!_loader.btn_file_active">
             <svg
               width="24"
               height="24"

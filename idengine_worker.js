@@ -13,11 +13,18 @@ const IdEngineConfig = {
 SmartIDEngine().then((SmartIDEngine) => {
   const engine = new SmartIDEngine.seIdEngine();
 
+  // send version 
+  postMessage({ requestType: 'wasmEvent', data: { type: 'version', desc: SmartIDEngine.seIdEngineGetVersion() } });
+
   // emit wasm ready
   postMessage({ requestType: 'wasmEvent', data: { type: 'ready' } });
 
   const sessionSettings = engine.CreateSessionSettings();
   sessionSettings.AddEnabledDocumentTypes(IdEngineConfig.docTypes);
+
+  sessionSettings.SetOption("common.extractImageFieldsInSourceResolution", "true");
+  sessionSettings.SetOption("common.extractTemplateImages", "true");
+
   const spawnedSession = engine.SpawnSession(sessionSettings, IdEngineConfig.secretKey);
 
   function checkSession() {
@@ -105,7 +112,7 @@ SmartIDEngine().then((SmartIDEngine) => {
     const result = spawnedSession.Process(imgSrc);
 
     const resultMessage = {
-      requestType: 'result',
+      requestType: 'resultFrame',
       data: {},
       images: {},
       templateDetection: getTemplateDetection(result),
@@ -125,6 +132,8 @@ SmartIDEngine().then((SmartIDEngine) => {
     for (iterTextFields; !iterTextFields.Equals(result.TextFieldsEnd()); iterTextFields.Advance()) {
       const key = iterTextFields.GetKey();
       const field = iterTextFields.GetValue();
+      //console.log('===============================');
+      //console.log(field.GetIsAccepted());
       resultMessage.data[key] = field.GetValue().GetFirstString();
     }
 
@@ -141,7 +150,7 @@ SmartIDEngine().then((SmartIDEngine) => {
 
     const result = spawnedSession.Process(imgSrc);
     const resultMessage = {
-      requestType: 'result',
+      requestType: 'resultFile',
       data: {},
       images: {},
       templateDetection: getTemplateDetection(result),
@@ -154,6 +163,8 @@ SmartIDEngine().then((SmartIDEngine) => {
       const field = iterTextFields.GetValue();
       resultMessage.data[key] = field.GetValue().GetFirstString();
     }
+    console.log(result);
+    console.log(result.GetImageFieldsCount());
 
     if (result.HasImageField('photo')) {
       resultMessage.images = result.GetImageField('photo').GetValue().GetBase64String();
