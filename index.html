@@ -21,7 +21,7 @@
       </div>
       <div class="header-log" v-scope>
         <div class="header-log-verison">version: {{_loader.wasmVersion}}</div>
-        <div class="header-log-multithread">multithreading:</div>
+        <div class="header-log-multithread">multithreading: No</div>
       </div>
     </header>
     <main class="main">
@@ -76,7 +76,7 @@
           </div>
         </div>
         <div class="main-result">
-          <h2>Result</h2>
+          <h2 v-scope>Result {{_log.performance}}</h2>
           <div class="main-body main-body--result">
             <div class="main-result-container custom--scroll" v-scope>
               <div class="main-result-img">

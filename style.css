@@ -145,6 +145,7 @@ h2 {
 
     &--result {
       width: auto;
+      font-family: "Fira Mono", sans-serif;
     }
   }
 
@@ -221,7 +222,6 @@ h2 {
     flex-basis: 100%;
     &-body {
       background-color: var(--c-light-5);
-      font-family: "Fira Mono", sans-serif;
     }
 
     &-container {

@@ -6,19 +6,33 @@ import { createApp, reactive } from "/petite-vue.es.js";
 
 const _log = reactive({
     logger: [],
+    p1: null,
+    performance: null,
     push(string) {
         console.log(string);
         let t = new Date().toLocaleTimeString();
         this.logger.unshift(t + " | " + string);
         // console.log(this.logger);
+    },
+    performanceStart() {
+        this.p1 = performance.now();
+    },
+    performanceStop() {
+        let p2 = performance.now();
+        let total = ((p2 - this.p1) / 1000).toFixed(3) + " sec";
+        this.performance = ": " + total;
+        this.push("Pass " + total + " seconds.");
     }
 });
 
 const _loader = reactive({
     systemReady() {
         this.wasmReady = true;
-        //btn_frame_active: true,
-        // btn_file_active: true,
+        return;
+    },
+    resetUI() {
+        _resultData.images = null;
+        _resultData.data = null;
         return;
     },
     wasmReady: false,
@@ -39,12 +53,15 @@ createApp({
     _log,
     _loader,
     _resultData,
+
     recognizerFrame() {
         _log.push('Capture video stream...');
         SEWorker.postMessage(requestFrame());
         _loader.btn_frame_active = true;
+        _log.performanceStart();
     },
     recognizeFile(event) {
+        _log.performanceStart();
         _loader.btn_file_active = true;
         const file = event.files[0];
 
@@ -142,6 +159,18 @@ async function main() {
 
 main();
 
+function requestFrame() {
+
+    // Show requested images by the wasm
+    console.log('%c ', `line-height:8rem;padding-right:25%;background:url(${canvas.toDataURL('image/jpeg', 1.0)}) top left / contain no-repeat`);
+
+    return {
+        requestType: 'frame',
+        imageData: canvas.getContext('2d', { alpha: false }).getImageData(0, 0, canvas.width, canvas.height),
+        width: canvas.width,
+        height: canvas.height,
+    };
+}
 
 function drawQuads(currentResult, cleanCanvas = false) {
 
@@ -195,18 +224,26 @@ SEWorker.onmessage = function (msg) {
             break;
 
         // processing result 
-        case 'resultFrame':
+        case 'result':
             let currentResult = msg.data;
             _loader.btn_frame_active = false;
+            _loader.btn_file_active = false;
+
+            _log.performanceStop();
             // timeout event
             if (Object.keys(currentResult.data).length === 0) {
                 _log.push('Document Not found 😕');
+                _loader.resetUI();
                 SEWorker.postMessage({ requestType: 'reset' });
                 return
             }
             // push to UI
+            if (typeof currentResult.images === 'string') {
+                _resultData.images = { 'unknown': currentResult.images };
+            } else {
+                _resultData.images = currentResult.images;
+            }
 
-            _resultData.images = currentResult.images;
             _resultData.data = currentResult.data;
 
             _log.push('Document Ready 👍');
@@ -220,42 +257,9 @@ SEWorker.onmessage = function (msg) {
             SEWorker.postMessage({ requestType: 'reset' });
 
             break;
-        // processing result for file
-        case 'resultFile':
-            let currentResultFile = msg.data;
-            _loader.btn_file_active = false;
-
-            // timeout event
-            if (Object.keys(currentResultFile.data).length === 0) {
-                _log.push('Document Not found 😕');
-                SEWorker.postMessage({ requestType: 'reset' });
-                return
-            }
-            // push to UI
-            // hack for file response. Should be fixed
-            if (typeof currentResultFile.images === 'string') {
-                _resultData.images = { 'unknown': currentResultFile.images };
-            } else {
-                _resultData.images = currentResultFile.images;
-            }
-            _resultData.data = currentResultFile.data;
-
-            _log.push('Document Ready 👍');
-            // get result
-            console.log(currentResultFile);
-
-            // Clear overlay canvas
-            drawQuads(currentResultFile);
-
-            // reset session on result. Overwise you will always get latest document on every request.
-            SEWorker.postMessage({ requestType: 'reset' });
-
-            break;
         // providing more images for recognition
         case 'FeedMeMore':
-            console.log('Feed Me More!! 🥝');
-            _log.push('Send image...');
-
+            _log.push('Feed Me More... 🥝');
             drawQuads(msg.data);
             SEWorker.postMessage(requestFrame());
             break;
@@ -286,15 +290,3 @@ function wasmEmitter(evenType) {
     }
 }
 
-function requestFrame() {
-
-    // Show requested images by the wasm
-    console.log('%c ', `line-height:8rem;padding-right:25%;background:url(${canvas.toDataURL('image/jpeg', 1.0)}) top left / contain no-repeat`);
-
-    return {
-        requestType: 'frame',
-        imageData: canvas.getContext('2d', { alpha: false }).getImageData(0, 0, canvas.width, canvas.height),
-        width: canvas.width,
-        height: canvas.height,
-    };
-}

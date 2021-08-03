@@ -27,6 +27,18 @@ SmartIDEngine().then((SmartIDEngine) => {
 
   const spawnedSession = engine.SpawnSession(sessionSettings, IdEngineConfig.secretKey);
 
+  console.log(engine);
+
+  console.log(sessionSettings);
+
+  const iterTextFields = sessionSettings.OptionsBegin();
+
+  for (iterTextFields; !iterTextFields.Equals(sessionSettings.OptionsEnd()); iterTextFields.Advance()) {
+    const key = iterTextFields.GetKey();
+    const field = iterTextFields.GetValue();
+    //console.log(key);
+  }
+
   function checkSession() {
     // Is settion allready activated?
     if (spawnedSession?.IsActivated()) {
@@ -112,7 +124,7 @@ SmartIDEngine().then((SmartIDEngine) => {
     const result = spawnedSession.Process(imgSrc);
 
     const resultMessage = {
-      requestType: 'resultFrame',
+      requestType: 'result',
       data: {},
       images: {},
       templateDetection: getTemplateDetection(result),
@@ -132,8 +144,6 @@ SmartIDEngine().then((SmartIDEngine) => {
     for (iterTextFields; !iterTextFields.Equals(result.TextFieldsEnd()); iterTextFields.Advance()) {
       const key = iterTextFields.GetKey();
       const field = iterTextFields.GetValue();
-      //console.log('===============================');
-      //console.log(field.GetIsAccepted());
       resultMessage.data[key] = field.GetValue().GetFirstString();
     }
 
@@ -149,8 +159,9 @@ SmartIDEngine().then((SmartIDEngine) => {
     const imgSrc = new SmartIDEngine.seImage(imageData);
 
     const result = spawnedSession.Process(imgSrc);
+    console.log(result);
     const resultMessage = {
-      requestType: 'resultFile',
+      requestType: 'result',
       data: {},
       images: {},
       templateDetection: getTemplateDetection(result),
@@ -163,8 +174,6 @@ SmartIDEngine().then((SmartIDEngine) => {
       const field = iterTextFields.GetValue();
       resultMessage.data[key] = field.GetValue().GetFirstString();
     }
-    console.log(result);
-    console.log(result.GetImageFieldsCount());
 
     if (result.HasImageField('photo')) {
       resultMessage.images = result.GetImageField('photo').GetValue().GetBase64String();
@@ -197,7 +206,7 @@ SmartIDEngine().then((SmartIDEngine) => {
       case 'reset':
         spawnedSession.Reset();
         postMessage({ requestType: 'wasmEvent', data: { type: 'reset' } });
-
+        break;
       // no default
     }
   };
