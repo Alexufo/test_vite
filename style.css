@@ -17,6 +17,11 @@
 
   --div-radius-1: 4px;
   --div-body-p: 1.5rem;
+
+  --w-640: 640;
+  --w-480: 480;
+
+
 }
 
 body {
@@ -127,10 +132,9 @@ h2 {
     background-color: var(--c-light-5);
     border-radius: var(--div-radius-1);
     position: relative;
-    height: 480px;
+    height: var(--w-480)px;
     width: 100%;
-    /*max-width: 640px;
-    max-height: 480px;*/
+ 
     overflow: hidden;
 
     .lds-ripple {
@@ -151,7 +155,7 @@ h2 {
 
   &-preview {
     flex-shrink: 0;
-    flex-basis: 640px;
+    flex-basis: var(--w-640)px;
     &-select {
       position: absolute;
       right: var(--div-body-p);

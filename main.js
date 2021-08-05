@@ -3,6 +3,12 @@
 
 // only for UI interaction
 import { createApp, reactive } from "/petite-vue.es.js";
+// main worker. Workers allow us do not block main thread during recognition.
+
+const SEWorker = new Worker('./bindings/idengine_worker.js', { type: 'module' });
+
+const canvas = document.querySelector('.js-main-canvas');
+const overlayCanvas = document.querySelector('.js-overlay-canvas');
 
 const _log = reactive({
     logger: [],
@@ -21,7 +27,7 @@ const _log = reactive({
         let p2 = performance.now();
         let total = ((p2 - this.p1) / 1000).toFixed(3) + " sec";
         this.performance = ": " + total;
-        this.push("Pass " + total + " seconds.");
+        this.push("Result in: " + total);
     }
 });
 
@@ -87,12 +93,7 @@ createApp({
 
 
 
-// main worker. Workers allow us do not block main thread during recognition.
 
-const SEWorker = new Worker('./idengine_worker.js');
-
-const canvas = document.querySelector('.js-main-canvas');
-const overlayCanvas = document.querySelector('.js-overlay-canvas');
 
 async function main() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -238,12 +239,7 @@ SEWorker.onmessage = function (msg) {
                 return
             }
             // push to UI
-            if (typeof currentResult.images === 'string') {
-                _resultData.images = { 'unknown': currentResult.images };
-            } else {
-                _resultData.images = currentResult.images;
-            }
-
+            _resultData.images = currentResult.images;
             _resultData.data = currentResult.data;
 
             _log.push('Document Ready 👍');

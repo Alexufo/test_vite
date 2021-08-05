@@ -1,7 +1,5 @@
 var SmartIDEngine = (function () {
-  var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
-  if (typeof __filename !== 'undefined')
-    _scriptDir = _scriptDir || __filename;
+  var _scriptDir = import.meta.url;
   return (function (SmartIDEngine) {
     SmartIDEngine = SmartIDEngine || {};
 
@@ -1357,7 +1355,7 @@ var SmartIDEngine = (function () {
       }
       function instantiateAsync() {
         if (!wasmBinary && typeof WebAssembly.instantiateStreaming === "function" && !isDataURI(wasmBinaryFile) && !isFileURI(wasmBinaryFile) && typeof fetch === "function") {
-          
+
           return fetch(wasmBinaryFile, {
             credentials: "same-origin"
           }).then(function (response) {
@@ -8027,11 +8025,4 @@ var SmartIDEngine = (function () {
   );
 }
 )();
-if (typeof exports === 'object' && typeof module === 'object')
-  module.exports = SmartIDEngine;
-else if (typeof define === 'function' && define['amd'])
-  define([], function () {
-    return SmartIDEngine;
-  });
-else if (typeof exports === 'object')
-  exports["SmartIDEngine"] = SmartIDEngine;
+export default SmartIDEngine;
