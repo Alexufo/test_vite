@@ -12,5 +12,5 @@
   "rules": {
     "require-jsdoc": 0
   },
-  "plugins": ["html", "prettier"]
+  "plugins": [ "prettier"]
 }

@@ -1,6 +1,12 @@
-import { checkSession, getTemplateDetection, getTemplateSegmentation, getTextFields, getImageFields } from './helper.js';
-
 import SmartIDEngine from './idengine_wasm.js';
+import { checkSession, getTemplateDetection, getTemplateSegmentation, getTextFields, getImageFields } from './helper.js';
+/*import { threads } from "./../js/wasm-feature-detect.js"; */
+
+
+// threads().then(e => {
+//   console.log(e);
+// });
+
 
 // We must check this flags together with Ilya
 // var DECLARE_ASM_MODULE_EXPORTS = 1;
@@ -18,20 +24,17 @@ import SmartIDEngine from './idengine_wasm.js';
 
 postMessage({ requestType: 'wasmEvent', data: { type: 'started' } });
 
-//const SmartIDEngine = new Worker('./idengine_wasm.js', { type: 'module' });
+console.log(SmartIDEngine);
 
-//console.log(SmartIDEngine);
-//importScripts('./idengine_wasm.js');
 
 const IdEngineConfig = {
-  activationUrl: 'https://127.0.0.1:8000',
+  activationUrl: 'https://localhost:8000',
   docTypes: 'mrz.*',
   secretKey: '2a883092fffd13a45a2bc8cb4ba781b325abfcd6b7b8efc76c4cc008610327e79f485a456a13e24318163019ef3fb8da5a059b89f2486b989bfaada8f0521ffb6119001fa8b0dbe2923aaf61910e4ea661c9344e38d27103cbd7d2bf08723fb88f20c2ee66bee1cda53e81c8f1b9c4320f72e560bd5972531ff839c49a80bf09',
 };
 
 // console.log(SmartIDEngine);
 // console.log(IdEngineConfig);
-
 
 SmartIDEngine().then((SmartIDEngine) => {
   const engine = new SmartIDEngine.seIdEngine();
@@ -53,19 +56,15 @@ SmartIDEngine().then((SmartIDEngine) => {
 
   const spawnedSession = engine.SpawnSession(sessionSettings, IdEngineConfig.secretKey);
 
-  console.log("--------------");
-  console.log(spawnedSession);
-
-  // console.log(sessionSettings);
-
-  /* show options */
-
-  const ss = sessionSettings.OptionsBegin();
-  for (; !ss.Equals(sessionSettings.OptionsEnd()); ss.Advance()) {
-    const key = ss.GetKey();
-    const field = ss.GetValue();
-    //console.log(`${key} - ${field}`);
-  }
+  /* show all options */
+  /*
+    const ss = sessionSettings.OptionsBegin();
+    for (; !ss.Equals(sessionSettings.OptionsEnd()); ss.Advance()) {
+      const key = ss.GetKey();
+      const field = ss.GetValue();
+      console.log(`${key} - ${field}`);
+    }
+  */
 
   function recognizerFrame(imageData, width, height) {
     // Frame processing method

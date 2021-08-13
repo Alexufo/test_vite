@@ -1,6 +1,6 @@
 export function checkSession(spawnedSession, IdEngineConfig) {
+
     // Is settion allready activated?
-    console.log(spawnedSession);
     if (spawnedSession?.IsActivated()) {
         return;
     }
@@ -8,12 +8,15 @@ export function checkSession(spawnedSession, IdEngineConfig) {
     try {
         // get dynamic key
         const dynKey = spawnedSession.GetActivationRequest();
-        const request = new XMLHttpRequest();
-        request.open('POST', IdEngineConfig.activationUrl, false); // false for sync request
-        request.send(dynKey);
 
-        if (request.status === 200 && request.responseText.length > 0) {
-            spawnedSession.Activate(request.responseText); // sesson activation
+        const req = new XMLHttpRequest();
+        req.open('POST', IdEngineConfig.activationUrl, false); // false for sync request
+        req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); // json content type will be preflighted!
+        req.send("dynKey=" + dynKey);
+
+        console.log("dynKey=" + dynKey);
+        if (req.status === 200 & req.responseText.length > 0) {
+            spawnedSession.Activate(req.responseText); // sesson activation
         } else {
             postMessage({ requestType: 'wasmEvent', data: { type: 'error', desc: 'something wrong with activation server' } });
             throw Error('something wrong with activation server');
@@ -23,6 +26,7 @@ export function checkSession(spawnedSession, IdEngineConfig) {
         postMessage({ requestType: 'wasmEvent', data: { type: 'error', desc: error } });
     }
 }
+
 
 /**
 *  GetTemplateDetectionResultsCount - Returns the number of detected document pages (templates).

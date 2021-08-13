@@ -1,9 +1,12 @@
-
-
+/**
+ * @type {import('vite').UserConfig}
+ */
+import { defineConfig } from "vite";
 import crossOriginIsolation from 'vite-plugin-cross-origin-isolation';
 import eslintPlugin from '@nabla/vite-plugin-eslint';
 
-export default {
+
+export default defineConfig({
   server: {
     fs: {
       // Allow serving files from one level up to the project root
@@ -12,19 +15,19 @@ export default {
   },
   plugins: [
     // other plugins...
-    crossOriginIsolation(),
-    eslintPlugin()
+    eslintPlugin(),
+    crossOriginIsolation()
   ],
 
   build: {
-
-    cssCodeSplit: false,
-    minify: false,
+    //target: 'es2015',
+    //cssCodeSplit: false,
+    //minify: 'terser',
     rollupOptions: {
       output: {
-        entryFileNames: "[name].js",
-        assetFileNames: 'assets/[name][extname]'
+        //entryFileNames: "[name].js",
+        //assetFileNames: 'assets/[name][extname]'
       },
     }
   }
-};
+});

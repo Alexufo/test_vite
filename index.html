@@ -8,14 +8,15 @@
     <link rel="stylesheet" href="/normalize.min.css" />
     <link rel="stylesheet" href="/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <link rel="modulepreload" href="/bindings/idengine_worker.js">
+    <link rel="modulepreload" href="/bindings/idengine_wasm.js">
     <title>Wasm App</title>
   </head>
-  <body class="body wrapper">
+  <body v-scope class="body wrapper" @mounted="setupRouting()" :class="_resultData.theme_selected">
     <header class="header">
       <section class="header-wrapper"></section>
       <div class="header-logo">
-        <a href="header-logo-link" src="/">
+        <a class="header-logo-link" href="/">
           <img src="/logo.svg" />
         </a>
       </div>
@@ -33,7 +34,7 @@
         <div class="main-preview">
           <h2>Camera or image</h2>
           <div class="main-body">
-            <div class="lds-ripple">
+            <div class="lds-ripple"> 
               <div></div>
               <div></div>
             </div>
@@ -74,44 +75,7 @@
             <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
             <canvas class="js-main-canvas main-canvas"></canvas>
           </div>
-        </div>
-        <div class="main-result">
-          <h2 v-scope>Result {{_log.performance}}</h2>
-          <div class="main-body main-body--result">
-            <div class="main-result-container custom--scroll" v-scope>
-              <div class="main-result-img">
-                <template v-for="(value, name) in _resultData.images">
-                  <div class="data-image">
-                    <div class="data-image-container">
-                      <img :src="`data:image/jpg;base64,${value}`" />
-                    </div>
-                    <div class="data-image-fieldname">{{ name }}</div>
-                  </div>
-                </template>
-              </div>
-              <div class="main-result-data">
-                <template v-for="(value, name) in _resultData.data">
-                  <div class="data-el data-el--accepted">
-                    <svg
-                      width="8"
-                      height="8"
-                      viewBox="0 0 8 8"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle cx="4" cy="4" r="4" fill="" />
-                    </svg>
-
-                    <div class="data-el-value">{{value}}</div>
-                    <div class="data-el-fieldname">{{name}}</div>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+          
       <section v-show="_loader.wasmReady" class="button-group" v-scope>
         <button v-on:click="recognizerFrame()" class="btn">
           <span v-if="_loader.btn_frame_active">
@@ -187,7 +151,7 @@
               />
             </svg>
 
-            Start capture
+            <span>Start capture</span>
           </span>
         </button>
 
@@ -260,7 +224,7 @@
                 fill="#192C39"
               />
             </svg>
-            Upload
+            <span>Upload</span>
           </span>
         </label>
         <input
@@ -271,8 +235,46 @@
           accept="image/png, image/jpeg"
         />
       </section>
+        </div>
+        <div class="main-result">
+          <h2 v-scope>Result {{_log.performance}}</h2>
+          <div class="main-body main-body--result">
+            <div class="main-result-container custom--scroll" v-scope>
+              <div class="main-result-img">
+                <template v-for="(value, name) in _resultData.images">
+                  <div class="data-image">
+                    <div class="data-image-container">
+                      <img :src="`data:image/jpg;base64,${value}`" />
+                    </div>
+                    <div class="data-image-fieldname">{{ name }}</div>
+                  </div>
+                </template>
+              </div>
+              <div class="main-result-data">
+                <template v-for="(value, name) in _resultData.data">
+                  <div class="data-el data-el--accepted">
+                    <svg
+                      width="8"
+                      height="8"
+                      viewBox="0 0 8 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle cx="4" cy="4" r="4" fill="" />
+                    </svg>
+
+                    <div class="data-el-value">{{value}}</div>
+                    <div class="data-el-fieldname">{{name}}</div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
     <footer></footer>
-    <script type="module" src="/main.js"></script>
+    <script type="module" src="/app.js"></script>
   </body>
 </html>
