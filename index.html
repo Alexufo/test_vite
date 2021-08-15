@@ -1,280 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="stylesheet" href="/fonts/dmsans.css" />
-    <link rel="stylesheet" href="/fonts/firamono.css" />
-    <link rel="stylesheet" href="/normalize.min.css" />
-    <link rel="stylesheet" href="/style.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="modulepreload" href="/bindings/idengine_worker.js">
-    <link rel="modulepreload" href="/bindings/idengine_wasm.js">
-    <title>Wasm App</title>
-  </head>
-  <body v-scope class="body wrapper" @mounted="setupRouting()" :class="_resultData.theme_selected">
-    <header class="header">
-      <section class="header-wrapper"></section>
-      <div class="header-logo">
-        <a class="header-logo-link" href="/">
-          <img src="/logo.svg" />
-        </a>
-      </div>
-      <div class="header-log" v-scope>
-        <div class="header-log-verison">version: {{_loader.wasmVersion}}</div>
-        <div class="header-log-multithread">multithreading: No</div>
-      </div>
-    </header>
-    <main class="main">
-      <h1 class="main-title">
-        Offline documents<br />
-        recogniton demostration
-      </h1>
-      <section class="main-wrapper">
-        <div class="main-preview">
-          <h2>Camera or image</h2>
-          <div class="main-body">
-            <div class="lds-ripple"> 
-              <div></div>
-              <div></div>
-            </div>
-            <div class="main-preview-select">
-              <span>
-                <svg
-                  width="22"
-                  height="14"
-                  viewBox="0 0 22 14"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M2 2L11 11L20 2"
-                    stroke="black"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </span>
-              <select>
-                <option>Cards</option>
-                <option>Barcode</option>
-                <option>All rus docs</option>
-              </select>
-            </div>
-            <div class="main-preview-log" v-if="_log.logger.length" v-scope>
-              <section class="main-preview__log custom--scroll">
-                <template v-for="item in _log.logger">
-                  <p>{{ item }}</p>
-                </template>
-              </section>
-            </div>
-            <!--  
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="/fonts/dmsans.css" />
+  <link rel="stylesheet" href="/fonts/firamono.css" />
+  <link rel="stylesheet" href="/normalize.min.css" />
+  <link rel="stylesheet" href="/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="modulepreload" href="/bindings/idengine_worker.js">
+  <link rel="modulepreload" href="/bindings/idengine_wasm.js">
+  <title>Wasm App</title>
+</head>
+
+<body v-scope v-cloak class="body" @mounted="setupRouting()" :class="_resultData.theme_selected">
+  <section class="header-wrapper ">
+    <div class="wrapper">
+      <header class=" header ">
+        <div class="header-logo">
+          <a class="header-logo-link" href="/">
+            <svg style="display:var(--logo-white)" width="244" height="39" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0)">
+                <path
+                  d="M121.924 15.691h1.759v3.047h.076c1.148-2.513 2.371-3.047 5.278-3.047v1.6c-4.283 0-5.125 2.285-5.125 5.941v7.998h-1.988V15.691zM77.942 20.186c-.076-2.362-1.912-3.352-4.054-3.352-1.682 0-3.671.686-3.671 2.666 0 1.676 1.912 2.285 3.213 2.59l2.524.533c2.141.305 4.436 1.6 4.436 4.266 0 3.351-3.366 4.646-6.196 4.646-3.595 0-6.042-1.676-6.348-5.484h1.912c.153 2.514 2.065 3.885 4.59 3.885 1.759 0 4.206-.762 4.206-2.971 0-1.828-1.683-2.361-3.365-2.819l-2.448-.533c-2.448-.685-4.36-1.523-4.36-4.113 0-3.123 3.136-4.342 5.813-4.342 3.136 0 5.584 1.6 5.66 4.951l-1.912.076zM82.379 15.691h1.759v2.59h.076c.995-1.828 2.601-3.047 5.125-3.047 2.065 0 3.901.99 4.436 3.047.918-2.056 2.907-3.047 4.972-3.047 3.366 0 5.125 1.752 5.125 5.409v10.511h-1.912V20.72c0-2.514-.994-3.961-3.672-3.961-3.289 0-4.206 2.666-4.206 5.56v8.76h-1.913V20.643c0-2.133-.841-3.809-3.212-3.809-3.29 0-4.59 2.438-4.666 5.713v8.607h-1.912V15.691zM159.327 15.691h1.912v2.666h.076c.689-1.828 2.754-3.123 4.972-3.123 4.36 0 5.66 2.286 5.66 5.942v9.978h-1.912V21.48c0-2.666-.841-4.646-3.977-4.646-2.983 0-4.819 2.285-4.896 5.332v8.988h-1.912l.077-15.463zM187.704 29.86c0 4.646-1.836 7.464-6.884 7.464-3.136 0-6.196-1.37-6.425-4.646h1.912c.383 2.285 2.448 3.123 4.513 3.123 3.519 0 4.972-2.057 4.972-5.866v-2.132h-.077c-.841 1.904-2.677 3.199-4.971 3.199-4.972 0-7.037-3.504-7.037-7.922 0-4.265 2.524-7.77 7.037-7.77 2.294 0 4.206 1.372 4.971 3.124h.077v-2.666h1.912v14.091zm-1.912-6.628c0-3.046-1.453-6.398-4.972-6.398-3.595 0-5.125 3.2-5.125 6.398 0 3.123 1.607 6.17 5.125 6.17 3.289-.076 4.972-3.047 4.972-6.17zM190.611 11.35h1.912v1.904h-1.912V11.35zm0 4.341h1.912v15.463h-1.912V15.691zM195.353 15.691h1.912v2.666h.077c.688-1.828 2.753-3.123 4.971-3.123 4.36 0 5.661 2.286 5.661 5.942v9.978h-1.913V21.48c0-2.666-.841-4.646-3.977-4.646-2.983 0-4.819 2.285-4.895 5.332v8.988h-1.836V15.691zM211.645 23.918c0 2.742 1.453 6.094 5.125 6.094 2.754 0 4.207-1.524 4.819-3.885h1.912c-.841 3.504-2.83 5.484-6.731 5.484-4.972 0-7.037-3.808-7.037-8.15 0-4.113 2.065-8.15 7.037-8.15 4.972 0 6.96 4.341 6.807 8.683h-11.932v-.076zm10.097-1.6c-.077-2.818-1.836-5.484-4.972-5.484s-4.819 2.666-5.125 5.484h10.097zM234.974 20.186c-.076-2.362-1.912-3.352-4.054-3.352-1.682 0-3.671.686-3.671 2.666 0 1.676 1.912 2.285 3.212 2.59l2.525.533c2.141.305 4.436 1.6 4.436 4.266 0 3.351-3.366 4.646-6.196 4.646-3.595 0-6.042-1.676-6.348-5.484h1.912c.153 2.514 2.065 3.885 4.589 3.885 1.76 0 4.207-.762 4.207-2.971 0-1.828-1.683-2.361-3.365-2.819l-2.448-.533c-2.448-.685-4.36-1.523-4.36-4.113 0-3.123 3.136-4.342 5.813-4.342 3.136 0 5.584 1.6 5.661 4.951l-1.913.076zM106.473 20.414c.153-3.656 2.753-5.18 6.272-5.18 2.753 0 5.737.838 5.737 4.952v8.226c0 .686.305 1.295 1.07 1.295h.612v1.6h-1.224c-1.912 0-2.218-1.22-2.218-2.895h-.076c-1.301 1.98-2.677 3.123-5.66 3.123-2.83 0-5.202-1.447-5.202-4.494 0-4.342 4.284-4.494 8.338-4.951 1.529-.152 2.447-.381 2.447-2.133 0-2.514-1.835-3.2-4.054-3.2-2.371 0-4.13 1.067-4.13 3.58l-1.912.077zm10.173 2.285c-.306.457-1.148.61-1.683.686-3.213.533-7.19.533-7.19 3.58 0 1.904 1.683 3.047 3.442 3.047 2.907 0 5.431-1.828 5.431-4.875v-2.438zM134.621 15.691h3.136v1.6h-3.136v10.436c0 1.218.153 1.98 1.529 2.056h1.607v1.6h-1.683c-2.524 0-3.366-.838-3.366-3.504V17.215h-2.677v-1.6h2.677v-4.342h1.913v4.418zM145.406 23.918c0 2.742 1.453 6.094 5.124 6.094 2.754 0 4.207-1.524 4.819-3.885h1.912c-.841 3.504-2.83 5.484-6.731 5.484-4.971 0-7.037-3.808-7.037-8.15 0-4.113 2.066-8.15 7.037-8.15 4.972 0 6.961 4.341 6.808 8.683h-11.932v-.076zm10.02-1.6c-.077-2.818-1.836-5.484-4.972-5.484s-4.819 2.666-5.125 5.484h10.097zM239.946 9.902h-.994v2.666h-.536V9.902h-.994v-.38h2.448l.076.38zM244 12.568h-.535v-2.59l-.995 2.59h-.306l-.994-2.59v2.59h-.536V9.445h.765l.918 2.362.918-2.362H244v3.123z"
+                  fill="white" />
+                <path
+                  d="M41.61 39c-5.813 0-10.479-2.438-13.156-6.78C26.312 37.173 20.117 39 14.762 39 5.89 39 .535 34.734.46 27.65a.58.58 0 01.153-.38.586.586 0 01.382-.153h6.884c.306 0 .536.229.536.533.382 4.038 3.748 4.875 6.501 4.875 1.607 0 4.36-.228 5.66-1.6.46-.532.689-1.142.689-1.904-.153-2.666-3.595-3.351-7.572-4.189-.689-.152-1.454-.305-2.219-.457-5.43-1.143-10.402-3.123-10.402-9.674 0-6.931 7.266-9.445 13.538-9.445 7.114 0 11.78 2.97 13.233 8.303 2.6-5.104 7.572-8.303 13.615-8.303 4.36 0 8.337 1.752 11.167 4.951 3.213 3.58 4.666 8.607 4.054 13.787 0 .305-.306.457-.535.457H33.808c.23 5.942 4.13 8.074 7.802 8.074 3.672 0 5.89-1.523 7.037-4.798a.575.575 0 01.535-.381h6.502c.153 0 .306.076.459.228.076.153.153.305.076.457C54.766 34.734 49.03 39 41.61 39zm-13.309-8.684c.23 0 .382.153.459.305 2.371 4.723 6.96 7.313 12.85 7.313 6.578 0 11.78-3.657 13.386-9.446h-5.431c-1.377 3.428-3.977 5.18-7.955 5.18-5.43 0-8.873-3.809-8.873-9.674 0-.305.23-.533.536-.533h22.334c.46-4.646-.917-9.14-3.824-12.416-2.6-2.97-6.272-4.57-10.326-4.57-7.19 0-14.456 5.408-14.456 15.767v.61c0 .228-.153.457-.306.533-.23.076-.46.076-.612-.076-1.912-1.829-4.895-2.666-7.573-3.276-.688-.152-1.453-.305-2.141-.457-4.36-.99-8.414-1.828-8.414-5.18 0-3.427 4.742-3.732 6.195-3.732 3.748 0 6.043 1.371 6.731 4.113h6.043c-1.3-7.54-9.026-8.379-12.315-8.379-5.736 0-12.467 2.21-12.467 8.303 0 5.485 3.824 7.389 9.56 8.608.766.152 1.454.304 2.219.457 4.207.914 8.26 1.675 8.414 5.18.076 1.066-.306 1.98-.995 2.741-1.53 1.6-4.36 1.905-6.501 1.905-4.36 0-6.96-1.904-7.496-5.408H1.53c.382 6.093 5.278 9.673 13.232 9.673 5.355 0 11.627-1.904 13.08-7.16 0-.152.153-.304.459-.38zm-14.15-18.585c-.842 0-5.125.152-5.125 2.59 0 2.437 3.442 3.122 7.496 3.96.688.153 1.453.305 2.141.457 2.448.534 5.125 1.295 7.19 2.819.077-2.057.383-3.961.995-5.713h-6.425c-.23 0-.46-.153-.536-.457-.459-2.438-2.371-3.657-5.737-3.657zm35.108 7.617H33.273a.585.585 0 01-.383-.153.58.58 0 01-.153-.38c.153-4.952 3.595-8.15 8.72-8.15 4.742 0 8.108 3.275 8.337 8.073a.58.58 0 01-.153.381.42.42 0 01-.382.229zm-15.45-1.143h14.838c-.459-3.885-3.289-6.474-7.19-6.474-4.283 0-7.19 2.59-7.649 6.474z"
+                  fill="url(#paint0_linear)" />
+              </g>
+              <defs>
+                <linearGradient id="paint0_linear" x1="56.815" y1="22.128" x2=".459" y2="22.128"
+                  gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#fff" />
+                  <stop offset="1" stop-color="#00B09A" />
+                </linearGradient>
+                <clipPath id="clip0">
+                  <path fill="#fff" d="M0 0h244v39H0z" />
+                </clipPath>
+              </defs>
+            </svg>
+            <svg style="display:var(--logo-black)" width="245" height="34" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M122.078 10.418h1.759v3.0468h.076c1.148-2.5136 2.372-3.0468 5.278-3.0468v1.5996c-4.283 0-5.125 2.2851-5.125 5.9414v7.998h-1.988V10.418zM78.0966 14.9121c-.0765-2.3613-1.9123-3.3516-4.054-3.3516-1.6827 0-3.6714.6856-3.6714 2.6661 0 1.6757 1.9122 2.2851 3.2125 2.5898l2.5241.5332c2.1417.3047 4.4364 1.5996 4.4364 4.2656 0 3.3516-3.3655 4.6465-6.1956 4.6465-3.595 0-6.0426-1.6758-6.3486-5.4844h1.9122c.153 2.5137 2.0652 3.8848 4.5894 3.8848 1.7592 0 4.2069-.7617 4.2069-2.9707 0-1.8281-1.6828-2.3613-3.3656-2.8184l-2.4476-.5332c-2.4477-.6855-4.3599-1.5234-4.3599-4.1132 0-3.1231 3.1361-4.34183 5.8132-4.34183 3.136 0 5.5837 1.59963 5.6602 4.95113l-1.9122.0762zM82.5329 10.418h1.7592v2.5898h.0765c.9944-1.8281 2.6007-3.04686 5.1248-3.04686 2.0652 0 3.9009.99026 4.4364 3.04686.9178-2.0566 2.9066-3.04686 4.9718-3.04686 3.3654 0 5.1244 1.75196 5.1244 5.40816v10.5118h-1.912V15.4453c0-2.5137-.994-3.9609-3.6714-3.9609-3.289 0-4.2069 2.666-4.2069 5.5605v8.7598h-1.9122V15.3691c0-2.1328-.8414-3.8086-3.2125-3.8086-3.2891 0-4.5894 2.4375-4.6659 5.7129v8.6075h-1.9122V10.418zM159.481 10.418h1.912v2.666h.077c.688-1.8281 2.753-3.12306 4.971-3.12306 4.36 0 5.661 2.28516 5.661 5.94136v9.9786h-1.913V16.207c0-2.666-.841-4.6465-3.977-4.6465-2.983 0-4.819 2.2852-4.895 5.3321v8.9883h-1.913l.077-15.4629zM187.858 24.5859c0 4.6465-1.835 7.4649-6.884 7.4649-3.136 0-6.195-1.3711-6.425-4.6465h1.912c.383 2.2851 2.448 3.123 4.513 3.123 3.519 0 4.972-2.0566 4.972-5.8652v-2.1328h-.076c-.842 1.9043-2.678 3.1992-4.972 3.1992-4.972 0-7.037-3.5039-7.037-7.9219 0-4.2656 2.524-7.7695 7.037-7.7695 2.294 0 4.207 1.3711 4.972 3.1231h.076v-2.6661h1.912v14.0918zm-1.912-6.6269c0-3.0469-1.453-6.3985-4.972-6.3985-3.595 0-5.124 3.1993-5.124 6.3985 0 3.123 1.606 6.1699 5.124 6.1699 3.289-.0762 4.972-3.0469 4.972-6.1699zM190.765 6.07617h1.912v1.9043h-1.912v-1.9043zm0 4.34183h1.912v15.4629h-1.912V10.418zM195.507 10.418h1.912v2.666h.077c.688-1.8281 2.754-3.12306 4.972-3.12306 4.36 0 5.66 2.28516 5.66 5.94136v9.9786h-1.912V16.207c0-2.666-.842-4.6465-3.978-4.6465-2.983 0-4.819 2.2852-4.895 5.3321v8.9883h-1.836V10.418zM211.799 18.6445c0 2.7422 1.454 6.0938 5.125 6.0938 2.754 0 4.207-1.5235 4.819-3.8848h1.912c-.841 3.5039-2.83 5.4844-6.731 5.4844-4.972 0-7.037-3.8086-7.037-8.1504 0-4.1133 2.065-8.1504 7.037-8.1504 4.972 0 6.961 4.3418 6.808 8.6836h-11.933v-.0762zm10.097-1.5996c-.077-2.8183-1.836-5.4844-4.972-5.4844s-4.819 2.6661-5.125 5.4844h10.097zM235.129 14.9121c-.077-2.3613-1.913-3.3516-4.054-3.3516-1.683 0-3.672.6856-3.672 2.6661 0 1.6757 1.912 2.2851 3.213 2.5898l2.524.5332c2.142.3047 4.436 1.5996 4.436 4.2656 0 3.3516-3.365 4.6465-6.195 4.6465-3.595 0-6.043-1.6758-6.349-5.4844h1.912c.153 2.5137 2.065 3.8848 4.59 3.8848 1.759 0 4.206-.7617 4.206-2.9707 0-1.8281-1.682-2.3613-3.365-2.8184l-2.448-.5332c-2.447-.6855-4.36-1.5234-4.36-4.1132 0-3.1231 3.136-4.34183 5.814-4.34183 3.136 0 5.583 1.59963 5.66 4.95113l-1.912.0762zM106.627 15.1406c.153-3.6562 2.754-5.17966 6.272-5.17966 2.754 0 5.737.83786 5.737 4.95116v8.2266c0 .6855.306 1.2949 1.071 1.2949h.612v1.5996h-1.224c-1.913 0-2.218-1.2187-2.218-2.8945h-.077c-1.3 1.9804-2.677 3.123-5.66 3.123-2.83 0-5.201-1.4472-5.201-4.4941 0-4.3418 4.283-4.4942 8.337-4.9512 1.53-.1523 2.448-.3809 2.448-2.1328 0-2.5137-1.836-3.1992-4.054-3.1992-2.372 0-4.131 1.0664-4.131 3.5801l-1.912.0761zm10.173 2.2852c-.306.457-1.147.6094-1.683.6855-3.212.5332-7.19.5332-7.19 3.5801 0 1.9043 1.683 3.0469 3.442 3.0469 2.907 0 5.431-1.8281 5.431-4.875v-2.4375zM134.775 10.418h3.136v1.5996h-3.136v10.4355c0 1.2188.153 1.9805 1.53 2.0567h1.606v1.5996h-1.683c-2.524 0-3.365-.8379-3.365-3.5039V11.9414h-2.677v-1.5996h2.677V6h1.912v4.418zM145.56 18.6445c0 2.7422 1.453 6.0938 5.125 6.0938 2.753 0 4.207-1.5235 4.818-3.8848h1.913c-.842 3.5039-2.83 5.4844-6.731 5.4844-4.972 0-7.037-3.8086-7.037-8.1504 0-4.1133 2.065-8.1504 7.037-8.1504 4.971 0 6.96 4.3418 6.807 8.6836H145.56v-.0762zm10.02-1.5996c-.077-2.8183-1.836-5.4844-4.972-5.4844s-4.819 2.6661-5.125 5.4844h10.097zM240.946 6.90234h-.994v2.66602h-.536V6.90234h-.994v-.38086h2.448l.076.38086zM245 9.56836h-.535V6.97852l-.995 2.58984h-.306l-.994-2.58984v2.58984h-.536V6.44531h.765l.918 2.36133.918-2.36133H245v3.12305z"
+                fill="#36C1AF" />
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M41.6511 33.7442c-5.8132 0-10.479-2.4375-13.1561-6.7793-2.1417 4.9511-8.3373 6.7793-13.6915 6.7793C5.93072 33.7442.576489 29.4785.5 22.3945c0-.1523.07648-.3046.152969-.3808.076489-.0762.229469-.1524.382451-.1524h6.88401c.30596 0 .53542.2286.53542.5332.38244 4.0372 3.74795 4.875 6.50155 4.875 1.6063 0 4.3599-.2285 5.6602-1.5996.459-.5332.6884-1.1425.6884-1.9043-.153-2.666-3.595-3.3515-7.5724-4.1894-.6884-.1524-1.4533-.3047-2.2182-.4571-5.4307-1.1425-10.40249-3.123-10.40249-9.67379C1.11191 2.51367 8.37838 0 14.6505 0c7.1135 0 11.7793 2.9707 13.2326 8.30273C30.4837 3.19921 35.4555 0 41.4981 0c4.3599 0 8.3373 1.75195 11.1674 4.95117 3.2126 3.58008 4.6659 8.60743 4.054 13.78713 0 .3047-.306.457-.5355.457H33.8492c.2295 5.9414 4.1304 8.0742 7.8019 8.0742s5.8897-1.5234 7.037-4.7988c.0765-.2285.306-.3808.5354-.3808h6.5016c.153 0 .3059.0761.4589.2285.0765.1523.153.3047.0765.457-1.4533 6.7031-7.19 10.9688-14.6094 10.9688zM9.06677 9.06445c0-2.4375 4.28343-2.58984 5.12473-2.58984 3.3656 0 5.2778 1.21875 5.7367 3.65629.0765.3046.306.457.5354.457h6.4251c-.6119 1.7519-.9178 3.6562-.9943 5.7129-2.0652-1.5235-4.7424-2.2852-7.19-2.8184-.6884-.1523-1.4533-.3047-2.1417-.457-4.0539-.8379-7.49593-1.5235-7.49593-3.96095zM48.6881 12.9492H33.8492c.459-3.88475 3.3656-6.47459 7.6489-6.47459 3.901 0 6.7311 2.58984 7.19 6.47459z"
+                fill="url(#paint0_linear2)" />
+              <defs>
+                <linearGradient id="paint0_linear2" x1="2.5" y1="32.5" x2="91.5" y2="11" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#36C1AF" />
+                  <stop offset="1" stop-color="#A4EF6A" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </a>
+        </div>
+        <div class="header-log" v-scope>
+          <div class="header-log-verison">version: {{_loader.wasmVersion}}</div>
+          <div class="header-log-multithread">multithreading: No</div>
+        </div>
+      </header>
+    </div>
+  </section>
+  <main class="main wrapper">
+    <h1 class="main-title">
+      Offline documents<br />
+      recogniton demostration
+    </h1>
+    <section class="main-wrapper">
+      <div class="main-preview">
+        <h2>Camera or image</h2>
+        <div class="main-body">
+          <div class="lds-ripple">
+            <div></div>
+            <div></div>
+          </div>
+          <div class="main-preview-select">
+            <span>
+              <svg width="22" height="14" viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 2L11 11L20 2" stroke="black" stroke-width="3" stroke-linecap="round" />
+              </svg>
+            </span>
+            <select>
+              <option>Cards</option>
+              <option>Barcode</option>
+              <option>All rus docs</option>
+            </select>
+          </div>
+          <div class="main-preview-log" v-if="_log.logger.length" v-scope>
+            <section class="main-preview__log custom--scroll">
+              <template v-for="item in _log.logger">
+                <p>{{ item }}</p>
+              </template>
+            </section>
+          </div>
+          <!--  
               1) canvas for capture video
               2) canvas for overlay drawing if needed
             -->
-            <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
-            <canvas class="js-main-canvas main-canvas"></canvas>
-          </div>
-          
-      <section v-show="_loader.wasmReady" class="button-group" v-scope>
-        <button v-on:click="recognizerFrame()" class="btn">
-          <span v-if="_loader.btn_frame_active">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 38 38"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient
-                  x1="8.042%"
-                  y1="0%"
-                  x2="65.682%"
-                  y2="23.865%"
-                  id="a"
-                >
-                  <stop stop-color="black" stop-opacity="0" offset="0%" />
-                  <stop
-                    stop-color="black"
-                    stop-opacity=".631"
-                    offset="63.146%"
-                  />
-                  <stop stop-color="black" offset="100%" />
-                </linearGradient>
-              </defs>
-              <g fill="none" fill-rule="evenodd">
-                <g transform="translate(1 1)">
-                  <path
-                    d="M36 18c0-9.94-8.06-18-18-18"
-                    id="Oval-2"
-                    stroke="url(#a)"
-                    stroke-width="2"
-                  >
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      from="0 18 18"
-                      to="360 18 18"
-                      dur="0.9s"
-                      repeatCount="indefinite"
-                    />
-                  </path>
-                  <circle fill="black" cx="36" cy="18" r="1">
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      from="0 18 18"
-                      to="360 18 18"
-                      dur="0.9s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                </g>
-              </g>
-            </svg>
-          </span>
-          <span v-if="!_loader.btn_frame_active">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.79999 12 8.79999C10.2327 8.79999 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
-                fill="#192C39"
-              />
-              <path
-                d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
-                fill="#192C39"
-              />
-            </svg>
-
-            <span>Start capture</span>
-          </span>
-        </button>
-
-        <label class="btn" for="select_file" v-scope>
-          <span v-if="_loader.btn_file_active">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 38 38"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient
-                  x1="8.042%"
-                  y1="0%"
-                  x2="65.682%"
-                  y2="23.865%"
-                  id="a"
-                >
-                  <stop stop-color="black" stop-opacity="0" offset="0%" />
-                  <stop
-                    stop-color="black"
-                    stop-opacity=".631"
-                    offset="63.146%"
-                  />
-                  <stop stop-color="black" offset="100%" />
-                </linearGradient>
-              </defs>
-              <g fill="none" fill-rule="evenodd">
-                <g transform="translate(1 1)">
-                  <path
-                    d="M36 18c0-9.94-8.06-18-18-18"
-                    id="Oval-2"
-                    stroke="url(#a)"
-                    stroke-width="2"
-                  >
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      from="0 18 18"
-                      to="360 18 18"
-                      dur="0.9s"
-                      repeatCount="indefinite"
-                    />
-                  </path>
-                  <circle fill="black" cx="36" cy="18" r="1">
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      from="0 18 18"
-                      to="360 18 18"
-                      dur="0.9s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                </g>
-              </g>
-            </svg>
-          </span>
-          <span v-if="!_loader.btn_file_active">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M9 16H15V10H19L12 3L5 10H9V16ZM5 18H19V20H5V18Z"
-                fill="#192C39"
-              />
-            </svg>
-            <span>Upload</span>
-          </span>
-        </label>
-        <input
-          v-on:change="recognizeFile($el)"
-          type="file"
-          id="select_file"
-          style="display: none"
-          accept="image/png, image/jpeg"
-        />
-      </section>
+          <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
+          <canvas class="js-main-canvas main-canvas"></canvas>
         </div>
-        <div class="main-result">
-          <h2 v-scope>Result {{_log.performance}}</h2>
-          <div class="main-body main-body--result">
-            <div class="main-result-container custom--scroll" v-scope>
-              <div class="main-result-img">
-                <template v-for="(value, name) in _resultData.images">
-                  <div class="data-image">
-                    <div class="data-image-container">
-                      <img :src="`data:image/jpg;base64,${value}`" />
-                    </div>
-                    <div class="data-image-fieldname">{{ name }}</div>
-                  </div>
-                </template>
-              </div>
-              <div class="main-result-data">
-                <template v-for="(value, name) in _resultData.data">
-                  <div class="data-el data-el--accepted">
-                    <svg
-                      width="8"
-                      height="8"
-                      viewBox="0 0 8 8"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle cx="4" cy="4" r="4" fill="" />
-                    </svg>
 
-                    <div class="data-el-value">{{value}}</div>
-                    <div class="data-el-fieldname">{{name}}</div>
+        <section v-show="_loader.wasmReady" class="button-group" v-scope>
+          <button v-on:click="recognizerFrame()" class="btn">
+            <span v-if="_loader.btn_frame_active">
+              <svg class="svg_loader" width="24" height="24" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient x1="8.042%" y1="0%" x2="65.682%" y2="23.865%" id="a">
+                    <stop stop-color="black" stop-opacity="0" offset="0%" />
+                    <stop stop-color="black" stop-opacity=".631" offset="63.146%" />
+                    <stop stop-color="black" offset="100%" />
+                  </linearGradient>
+                </defs>
+                <g fill="none" fill-rule="evenodd">
+                  <g transform="translate(1 1)">
+                    <path d="M36 18c0-9.94-8.06-18-18-18" id="Oval-2" stroke="url(#a)" stroke-width="2">
+                      <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s"
+                        repeatCount="indefinite" />
+                    </path>
+                    <circle fill="black" cx="36" cy="18" r="1">
+                      <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s"
+                        repeatCount="indefinite" />
+                    </circle>
+                  </g>
+                </g>
+              </svg>
+            </span>
+            <span v-if="!_loader.btn_frame_active">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.79999 12 8.79999C10.2327 8.79999 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
+                  fill="#192C39" />
+                <path
+                  d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
+                  fill="#192C39" />
+              </svg>
+
+              <span>Start capture</span>
+            </span>
+          </button>
+
+          <label class="btn btn--type2" for="select_file" v-scope>
+            <span v-if="_loader.btn_file_active">
+              <svg class="svg_loader" width="24" height="24" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient x1="8.042%" y1="0%" x2="65.682%" y2="23.865%" id="a">
+                    <stop stop-opacity="0" offset="0%"/>
+                    <stop stop-opacity=".631" offset="63.146%"/>
+                    <stop offset="100%"/>
+                  </linearGradient>
+                </defs>
+                <g transform="translate(1 1)" fill="none" fill-rule="evenodd">
+                  <path d="M36 18c0-9.94-8.06-18-18-18" stroke="url(#a)" stroke-width="2">
+                    <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s" repeatCount="indefinite"/>
+                  </path> 
+                  <circle fill="#000" cx="36" cy="18" r="1">
+                    <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s" repeatCount="indefinite"/>
+                  </circle>
+                </g>
+              </svg>
+            </span>
+            <span v-if="!_loader.btn_file_active">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 16H15V10H19L12 3L5 10H9V16ZM5 18H19V20H5V18Z" fill="#192C39" />
+              </svg>
+              <span>Upload</span>
+            </span>
+          </label>
+          <input v-on:change="recognizeFile($el)" type="file" id="select_file" style="display: none"
+            accept="image/png, image/jpeg" />
+        </section>
+      </div>
+      <div class="main-result">
+        <h2 v-scope>Result {{_log.performance}}</h2>
+        <div class="main-body main-body--result">
+          <div class="main-result-container custom--scroll" v-scope>
+            <div class="main-result-img">
+              <template v-for="(value, name) in _resultData.images">
+                <div class="data-image">
+                  <div class="data-image-container">
+                    <img :src="`data:image/jpg;base64,${value}`" />
                   </div>
-                </template>
-              </div>
+                  <div class="data-image-fieldname">{{ name }}</div>
+                </div>
+              </template>
+            </div>
+            <div class="main-result-data">
+              <template v-for="(value, name) in _resultData.data">
+                <div class="data-el data-el--accepted">
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="4" cy="4" r="4" fill="" />
+                  </svg>
+
+                  <div class="data-el-value">{{value}}</div>
+                  <div class="data-el-fieldname">{{name}}</div>
+                </div>
+              </template>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-    </main>
-    <footer></footer>
-    <script type="module" src="/app.js"></script>
-  </body>
+  </main>
+  <footer></footer>
+  <script type="module" src="/app.js"></script>
+</body>
+
 </html>
