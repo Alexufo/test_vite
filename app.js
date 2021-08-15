@@ -12,6 +12,11 @@ const canvas = document.querySelector('.js-main-canvas');
 const overlayCanvas = document.querySelector('.js-overlay-canvas');
 
 
+// Вася 
+
+
+
+
 const _log = reactive({
     logger: [],
     p1: null,
@@ -32,6 +37,7 @@ const _log = reactive({
         this.push("Result in: " + total);
     }
 });
+
 
 const _loader = reactive({
     systemReady() {
@@ -248,7 +254,7 @@ SEWorker.onmessage = function (msg) {
             _log.performanceStop();
             // timeout event
             if (Object.keys(currentResult.data).length === 0) {
-                _log.push('Document Not found 😕');
+                _log.push('😕 Document Not found');
                 _loader.resetUI();
                 SEWorker.postMessage({ requestType: 'reset' });
                 return
@@ -257,7 +263,7 @@ SEWorker.onmessage = function (msg) {
             _resultData.images = currentResult.images;
             _resultData.data = currentResult.data;
 
-            _log.push('Document Ready 👍');
+            _log.push('👍 Document Ready');
             // get result
             console.log(currentResult);
 
@@ -270,7 +276,7 @@ SEWorker.onmessage = function (msg) {
             break;
         // providing more images for recognition
         case 'FeedMeMore':
-            _log.push('Feed Me More... 🥝');
+            _log.push('🥝 Feed Me More...');
             drawQuads(msg.data);
             SEWorker.postMessage(requestFrame());
             break;
@@ -284,7 +290,7 @@ function wasmEmitter(evenType) {
             _log.push('Wasm download and compiling...');
             break;
         case 'ready':
-            _log.push('Wasm ready 🟢');
+            _log.push('🟢 Wasm ready');
             _loader.systemReady();
             break;
         case 'error':
@@ -293,6 +299,10 @@ function wasmEmitter(evenType) {
         case 'version':
             _loader.wasmVersion = evenType.desc;
             _log.push('Version: ' + evenType.desc);
+            break;
+        case 'benchmark':
+            console.log(evenType);
+            _log.push(evenType.desc);
             break;
         case 'reset':
             _log.push('--- Session Reset ---');

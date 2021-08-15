@@ -21,6 +21,34 @@ import { checkSession, getTemplateDetection, getTemplateSegmentation, getTextFie
 // var MINIMAL_RUNTIME_STREAMING_WASM_COMPILATION = 0;
 // var MINIMAL_RUNTIME_STREAMING_WASM_INSTANTIATION = 0;
 
+class benchmark {
+
+  constructor(name) {
+    this.name = name;
+    this.p1 = '';
+    this.p2 = '';
+  }
+  start() {
+    this.p1 = performance.now();
+  }
+
+  stop() {
+    this.p2 = performance.now();
+    let total = ((this.p2 - this.p1) / 1000).toFixed(3) + " sec";
+
+    postMessage({
+      requestType: 'wasmEvent',
+      data: { type: 'benchmark', desc: "🕔" + this.name + ": " + total }
+    });
+
+  }
+}
+
+let _bench_engine = new benchmark("Create engine");
+let _bench_process = new benchmark("Session process");
+
+
+
 
 postMessage({ requestType: 'wasmEvent', data: { type: 'started' } });
 
@@ -37,8 +65,9 @@ const IdEngineConfig = {
 // console.log(IdEngineConfig);
 
 SmartIDEngine().then((SmartIDEngine) => {
+  _bench_engine.start();
   const engine = new SmartIDEngine.seIdEngine();
-
+  _bench_engine.stop();
   // emit wasm version 
   postMessage({
     requestType: 'wasmEvent',
@@ -72,9 +101,9 @@ SmartIDEngine().then((SmartIDEngine) => {
     const channels = rawData.byteLength / (height * width); // Number of channels
     const stride = channels >= 3 ? (rawData.byteLength / height) : width; // Stride calculation
     const imgSrc = new SmartIDEngine.seImageFromBuffer(rawData, width, height, stride, channels);
-
+    _bench_process.start();
     const result = spawnedSession.Process(imgSrc);
-
+    _bench_process.stop();
     /** we must feed the system if it still feels image hungry */
 
     if (!result.GetIsTerminal()) {
@@ -101,7 +130,9 @@ SmartIDEngine().then((SmartIDEngine) => {
 
   function recognizeFile(imageData) {
     const imgSrc = new SmartIDEngine.seImage(imageData);
+    _bench_process.start();
     const result = spawnedSession.Process(imgSrc);
+    _bench_process.stop();
 
     const resultMessage = {
       requestType: 'result',

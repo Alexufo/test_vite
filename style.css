@@ -10,10 +10,10 @@
   --font-btn: bold 1.1rem/1 var(--font-family), sans-serif;
 
   --c-main: #00b09a;
-
   --c-h2: var(--c-main);
 
   --c-fonts: #f5f5f5;
+  --font-btn: bold 1.1rem/1 var(--font-family);  
 
   --c-light: #467c8b;
   --c-light-2: #7ea3ab;
@@ -29,7 +29,7 @@
   --log-back-color: rgba(22, 39, 45, 0.9);
   --log-color: var(--c-fonts);
 
-  --div-radius-1: 0;
+  --div-radius-1: 4px;
   --div-radius-btn: 4px;
 
   --div-body-p: 1.5rem;
@@ -40,7 +40,7 @@
 
   --btn-2-color: var(--c-light-4);
   --btn-2-bg-color: var(--c-main);
-  --btn-2-hover: #fcc521;
+  --btn-2-hover: #1ae2c9;
 
   --w-640: 640px;
   --w-480: 470px;
@@ -60,6 +60,7 @@
   --font-family: "Tinkoff Sans", sans-serif;
 
   --font: bold 1.1rem/1 var(--font-family);
+
 
   --c-main: #ffdd2d;
   --c-h2: #333333;
@@ -264,7 +265,7 @@ h2 {
 
     @mixin media 1280px {
       --w-640: 400px;
-      --w-480: 400px;
+      --w-480: 394px;
     }
 
     &-select {
