@@ -6,12 +6,13 @@ import { createApp, reactive } from "./js/petite-vue.es.js";
 
 // use <link rel="modulepreload" to preload workers. Cold start boost
 // https://web.dev/module-workers/
-const SEWorker = new Worker('./bindings/idengine_worker', { type: 'module' });
+// const SEWorker = new Worker('./bindings/idengine_worker', { type: 'module' });
+const SEWorker = new Worker('./bindings/idengine_worker');
 
 const canvas = document.querySelector('.js-main-canvas');
 const overlayCanvas = document.querySelector('.js-overlay-canvas');
 
-// Вася 
+// 
 
 const _log = reactive({
     logger: [],
@@ -82,7 +83,7 @@ createApp({
         });
         reader.readAsArrayBuffer(file);
     },
-    setupRouting() {
+    _setupRouting() {
         const onHashChange = () => {
 
             if (window.location.hash) {
@@ -91,7 +92,7 @@ createApp({
         }
         window.addEventListener('hashchange', onHashChange);
         onHashChange();
-    },
+    }
 }).mount();
 
 async function main() {

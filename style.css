@@ -420,10 +420,19 @@ h2 {
   &-container {
   }
 
+  a {
+    display:block;
+    &:hover {
+      opacity: .7;
+    }
+  }
+
   &-fieldname {
     padding-top: 0.2rem;
     margin-bottom: 0.5rem;
     color: var(--c-light-6);
+    font-size: 0.8rem;
+    word-break: break-word;
   }
 }
 
@@ -449,7 +458,7 @@ h2 {
       color: var(--c-not-accept);
     }
   }
-
+/*
   &--not-sure {
     svg {
       fill: var(--c-not-sure);
@@ -459,7 +468,7 @@ h2 {
       color: var(--c-not-sure);
     }
   }
-
+*/
   svg {
     position: absolute;
     top: 0.3rem;

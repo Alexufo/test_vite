@@ -9,11 +9,11 @@
   <link rel="stylesheet" href="/normalize.min.css" />
   <link rel="stylesheet" href="/style.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="modulepreload" href="/bindings/idengine_worker.js">
-  <link rel="modulepreload" href="/bindings/idengine_wasm.js">
+  <!-- *<link rel="modulepreload" href="/bindings/idengine_worker.js"> 
+  <link rel="modulepreload" href="/bindings/idengine_wasm.js"> -->
   <title>Wasm App</title>
 </head>
-<body v-scope v-cloak class="body" @mounted="setupRouting()" :class="_resultData.theme_selected">
+<body v-scope v-cloak class="body" @mounted="_setupRouting()" :class="_resultData.theme_selected">
   <section class="header-wrapper ">
     <div class="wrapper">
       <header class=" header ">
@@ -182,21 +182,23 @@
               <template v-for="(value, name) in _resultData.images">
                 <div class="data-image">
                   <div class="data-image-container">
-                    <img :src="`data:image/jpg;base64,${value}`" />
+                    <a :href="`${value}`" target="_blank"> 
+                      <img :src="`${value}`" />
+                    </a>
                   </div>
                   <div class="data-image-fieldname">{{ name }}</div>
                 </div>
               </template>
             </div>
             <div class="main-result-data">
-              <template v-for="(value, name) in _resultData.data">
-                <div class="data-el data-el--accepted">
+              <template v-for="(item, index) in _resultData.data">
+                <div class="data-el " :class="item.isAccepted ? 'data-el--accepted' : 'data-el--not-accepted'" >
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="4" cy="4" r="4" fill="" />
                   </svg>
 
-                  <div class="data-el-value">{{value}}</div>
-                  <div class="data-el-fieldname">{{name}}</div>
+                  <div class="data-el-value">{{item.value}}</div>
+                  <div class="data-el-fieldname">{{item.name}}</div>
                 </div>
               </template>
             </div>
