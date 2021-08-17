@@ -38,16 +38,14 @@ class benchmark {
 
     postMessage({
       requestType: 'wasmEvent',
-      data: { type: 'benchmark', desc: "🕔" + this.name + ": " + total }
+      data: { type: 'benchmark', name: this.name, desc: "🕔 " + this.name + ": " + total }
     });
 
   }
 }
 
-let _bench_engine = new benchmark("Create engine");
-let _bench_process = new benchmark("Session process");
-
-
+let _bench_engine = new benchmark("Create Engine");
+let _bench_process = new benchmark("Session Process");
 
 
 postMessage({ requestType: 'wasmEvent', data: { type: 'started' } });
@@ -56,7 +54,7 @@ console.log(SmartIDEngine);
 
 
 const IdEngineConfig = {
-  activationUrl: 'https://localhost:8000',
+  activationUrl: 'https://localhost:8000/act/',
   docTypes: 'mrz.*',
   secretKey: '2a883092fffd13a45a2bc8cb4ba781b325abfcd6b7b8efc76c4cc008610327e79f485a456a13e24318163019ef3fb8da5a059b89f2486b989bfaada8f0521ffb6119001fa8b0dbe2923aaf61910e4ea661c9344e38d27103cbd7d2bf08723fb88f20c2ee66bee1cda53e81c8f1b9c4320f72e560bd5972531ff839c49a80bf09',
 };

@@ -13,7 +13,6 @@
   <link rel="modulepreload" href="/bindings/idengine_wasm.js">
   <title>Wasm App</title>
 </head>
-
 <body v-scope v-cloak class="body" @mounted="setupRouting()" :class="_resultData.theme_selected">
   <section class="header-wrapper ">
     <div class="wrapper">
@@ -98,8 +97,8 @@
             </section>
           </div>
           <!--  
-              1) canvas for capture video
-              2) canvas for overlay drawing if needed
+              First canvas for capture video
+              Second canvas for overlay drawing if needed
             -->
           <canvas class="js-overlay-canvas main-canvas-overlay"></canvas>
           <canvas class="js-main-canvas main-canvas"></canvas>
@@ -176,7 +175,7 @@
         </section>
       </div>
       <div class="main-result">
-        <h2 v-scope>Result {{_log.performance}}</h2>
+        <h2 v-scope>Result{{_log.performance}}</h2>
         <div class="main-body main-body--result">
           <div class="main-result-container custom--scroll" v-scope>
             <div class="main-result-img">

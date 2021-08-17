@@ -11,10 +11,12 @@ export function checkSession(spawnedSession, IdEngineConfig) {
 
         const req = new XMLHttpRequest();
         req.open('POST', IdEngineConfig.activationUrl, false); // false for sync request
-        req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); // json content type will be preflighted!
-        req.send("dynKey=" + dynKey);
+        req.setRequestHeader('Content-type', 'text/plain'); // json content type will be preflighted!
+        //req.send("dynKey=" + dynKey);
+        req.send(`{"dynKey": "${dynKey}"}`);
 
-        console.log("dynKey=" + dynKey);
+
+        console.log(`{"dynKey":"${dynKey}"`);
         if (req.status === 200 & req.responseText.length > 0) {
             spawnedSession.Activate(req.responseText); // sesson activation
         } else {

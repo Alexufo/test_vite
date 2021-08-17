@@ -11,11 +11,7 @@ const SEWorker = new Worker('./bindings/idengine_worker', { type: 'module' });
 const canvas = document.querySelector('.js-main-canvas');
 const overlayCanvas = document.querySelector('.js-overlay-canvas');
 
-
 // Вася 
-
-
-
 
 const _log = reactive({
     logger: [],
@@ -26,18 +22,8 @@ const _log = reactive({
         let t = new Date().toLocaleTimeString();
         this.logger.unshift(t + " | " + string);
         // console.log(this.logger);
-    },
-    performanceStart() {
-        this.p1 = performance.now();
-    },
-    performanceStop() {
-        let p2 = performance.now();
-        let total = ((p2 - this.p1) / 1000).toFixed(3) + " sec";
-        this.performance = ": " + total;
-        this.push("Result in: " + total);
     }
 });
-
 
 const _loader = reactive({
     systemReady() {
@@ -67,7 +53,6 @@ const _resultData = reactive({
     theme_selected: ''
 });
 
-
 createApp({
     _log,
     _loader,
@@ -77,10 +62,8 @@ createApp({
         _log.push('Capture video stream...');
         SEWorker.postMessage(requestFrame());
         _loader.btn_frame_active = true;
-        _log.performanceStart();
     },
     recognizeFile(event) {
-        _log.performanceStart();
         _loader.btn_file_active = true;
         const file = event.files[0];
 
@@ -102,7 +85,6 @@ createApp({
     setupRouting() {
         const onHashChange = () => {
 
-            console.log(window.location.hash);
             if (window.location.hash) {
                 _resultData.theme_selected = window.location.hash.substring(1);
             }
@@ -111,10 +93,6 @@ createApp({
         onHashChange();
     },
 }).mount();
-
-
-
-
 
 async function main() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -126,6 +104,7 @@ async function main() {
     // video tag is nessedory to get video from webcam
     const video = document.createElement('video');
 
+    // access to camera
     async function setupCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -167,12 +146,14 @@ async function main() {
     // create canvas and run stream from video element
     const { videoWidth, videoHeight } = video;
 
+    // dublicate canvas size for overlay
     canvas.width = overlayCanvas.width = videoWidth;
     canvas.height = overlayCanvas.height = videoHeight;
 
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 
     function animate() {
+        // disable alpha channel!
         canvas.getContext('2d', { alpha: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
         requestAnimationFrame(animate);
     }
@@ -241,7 +222,6 @@ SEWorker.onmessage = function (msg) {
 
         // events from wasm worker
         case 'wasmEvent':
-
             wasmEmitter(msg.data.data);
             break;
 
@@ -251,7 +231,6 @@ SEWorker.onmessage = function (msg) {
             _loader.btn_frame_active = false;
             _loader.btn_file_active = false;
 
-            _log.performanceStop();
             // timeout event
             if (Object.keys(currentResult.data).length === 0) {
                 _log.push('😕 Document Not found');
@@ -270,7 +249,7 @@ SEWorker.onmessage = function (msg) {
             // Clear overlay canvas
             drawQuads(null, true);
 
-            // reset session on result. Overwise you will always get latest document on every request.
+            // reset session on result. Overwise you will always get result of latest document every request.
             SEWorker.postMessage({ requestType: 'reset' });
 
             break;
@@ -303,6 +282,10 @@ function wasmEmitter(evenType) {
         case 'benchmark':
             console.log(evenType);
             _log.push(evenType.desc);
+
+            if (evenType.name === "Session Process") {
+                _log.performance = ": " + evenType.desc.split(":")[1];
+            }
             break;
         case 'reset':
             _log.push('--- Session Reset ---');
