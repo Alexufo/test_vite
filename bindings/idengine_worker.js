@@ -13,7 +13,6 @@ importScripts("./idengine_wasm.js");
 //   console.log(e);
 // });
 
-
 // We must check this flags together with Ilya
 // var DECLARE_ASM_MODULE_EXPORTS = 1;
 // BUILD_AS_WORKER = 0;
@@ -27,42 +26,39 @@ importScripts("./idengine_wasm.js");
 // var MINIMAL_RUNTIME_STREAMING_WASM_COMPILATION = 0;
 // var MINIMAL_RUNTIME_STREAMING_WASM_INSTANTIATION = 0;
 
+class benchmark {
 
+  constructor() {
+    this.name = "Session Process";
+    this.p1 = '';
+    this.p2 = '';
+  }
+  start() {
+    if (this.p1.length == 0) {
+      this.p1 = performance.now();
+    }
+  }
 
+  stop() {
+    this.p2 = performance.now();
+    let total = ((this.p2 - this.p1) / 1000).toFixed(3) + " sec";
 
+    postMessage({
+      requestType: 'wasmEvent',
+      data: { type: 'benchmark', name: total, desc: "🕔 " + this.name + ": " + total }
+    });
 
-// class benchmark {
+    this.p1 = '';
 
-//   constructor(name) {
-//     this.name = name;
-//     this.p1 = '';
-//     this.p2 = '';
-//   }
-//   start() {
-//     this.p1 = performance.now();
-//   }
+  }
+}
 
-//   stop() {
-//     this.p2 = performance.now();
-//     let total = ((this.p2 - this.p1) / 1000).toFixed(3) + " sec";
-
-//     postMessage({
-//       requestType: 'wasmEvent',
-//       data: { type: 'benchmark', name: this.name, desc: "🕔 " + this.name + ": " + total }
-//     });
-
-//   }
-// }
-
-// let _bench_process = new benchmark("Session Process");
-
-
-
+let _bench_frame = new benchmark();
+let _bench_file = new benchmark();
 
 postMessage({ requestType: 'wasmEvent', data: { type: 'started' } });
 
-console.log(SmartIDEngine);
-
+// console.log(SmartIDEngine);
 
 const IdEngineConfig = {
   activationUrl: 'https://localhost:8000/act/',
@@ -86,11 +82,18 @@ SmartIDEngine().then((SmartIDEngine) => {
   // emit wasm ready
   postMessage({ requestType: 'wasmEvent', data: { type: 'ready' } });
 
+
+  const sessionSettings0 = {
+  };
+
+
   const sessionSettings = engine.CreateSessionSettings();
+
   sessionSettings.AddEnabledDocumentTypes(IdEngineConfig.docTypes);
 
   sessionSettings.SetOption("common.extractImageFieldsInSourceResolution", "true");
   sessionSettings.SetOption("common.extractTemplateImages", "true");
+  console.log(sessionSettings);
 
   // For images with alpha channel. 
   // sessionSettings.SetOption("common.rgbPixelFormat", "RGBA");
@@ -98,15 +101,23 @@ SmartIDEngine().then((SmartIDEngine) => {
   const spawnedSession = engine.SpawnSession(sessionSettings, IdEngineConfig.secretKey);
 
   /* show all session options */
-  /*
-    const ss = sessionSettings.OptionsBegin();
-    for (; !ss.Equals(sessionSettings.OptionsEnd()); ss.Advance()) {
-      const key = ss.GetKey();
-      const field = ss.GetValue();
-      console.log(`${key} - ${field}`);
-    }
-  */
 
+  // const ss = sessionSettings.SupportedDocumentTypesBegin();
+  // for (; !ss.Equals(sessionSettings.SupportedDocumentTypesEnd()); ss.Advance()) {
+  //   console.log(ss);
+  //   // const key = ss.GetKey();
+  //   // const field = ss.GetValue();
+  //   // console.log(`${key} - ${field}`);
+  // }
+
+  // const data = {};
+  // const tf = sessionSettings.SupportedDocumentTypesBegin();
+  // for (; !tf.Equals(sessionSettings.SupportedDocumentTypesEnd()); tf.Advance()) {
+
+  //   console.log(tf.GetKey());
+  //   console.log(tf.GetValue());
+
+  // }
 
   /*
   *  Inside result object in __proto__ you will see all methods 
@@ -127,7 +138,6 @@ SmartIDEngine().then((SmartIDEngine) => {
     };
   }
 
-
   // Frame processing method
   function recognizerFrame(imageData, width, height) {
 
@@ -136,9 +146,9 @@ SmartIDEngine().then((SmartIDEngine) => {
     const channels = rawData.byteLength / (height * width); // Number of channels
     const stride = channels >= 3 ? (rawData.byteLength / height) : width; // Stride calculation
     const imgSrc = new SmartIDEngine.seImageFromBuffer(rawData, width, height, stride, channels);
-    console.time("spawned Session");
+    _bench_frame.start();
     const result = spawnedSession.Process(imgSrc);
-    console.timeEnd("spawned Session");
+
     /** we must feed the system if it still feels image hungry */
 
     if (!result.GetIsTerminal()) {
@@ -147,9 +157,12 @@ SmartIDEngine().then((SmartIDEngine) => {
         templateDetection: getTemplateDetection(result),
         templateSegmentation: getTemplateSegmentation(result)
       };
+
     }
+    _bench_frame.stop();
+
     const templateSize = imgSrc.GetSize();
-    console.log(templateSize);
+
     const resultMessage = resultObject(result, templateSize);
 
     imgSrc.delete();
@@ -157,13 +170,12 @@ SmartIDEngine().then((SmartIDEngine) => {
     return resultMessage;
   }
 
-
   function recognizeFile(imageData) {
     const imgSrc = new SmartIDEngine.seImage(imageData);
     const templateSize = imgSrc.GetSize();
-    console.time("spawned Session");
+    _bench_file.start();
     const result = spawnedSession.Process(imgSrc);
-    console.timeEnd("spawned Session");
+    _bench_file.stop();
 
     const resultMessage = resultObject(result, templateSize);
 
@@ -178,7 +190,6 @@ SmartIDEngine().then((SmartIDEngine) => {
       case 'frame':
         console.log("spawnedSession");
         //console.log(spawnedSession);
-
 
         checkSession(spawnedSession, IdEngineConfig);
         const resultFrame = recognizerFrame(
@@ -312,22 +323,6 @@ function getTextFields(result) {
   return data;
 }
 
-/* Get supported documents modes */
-
-// function getSupportedModes(result) {
-
-//   const data = {};
-//   const tf = result.SupportedDocumentTypesBegin();
-//   for (; !tf.Equals(result.SupportedModesEnd()); tf.Advance()) {
-
-//     console.log(tf.GetValue());
-//     console.log(tf.GetValue());
-
-//   }
-//   //return data;
-// }
-
-
 /* Convert base64 images to blob urls for better reuse in UI */
 function base64toBlob(data) {
   const b = atob(data);
@@ -347,7 +342,7 @@ function getImageFields(result, templateSize, templateDetection, templateSegment
   const images = {};
 
   // add svg masks for segmentation demonstration in total result
-  images.mask = getSvgQuads(result, templateSize, templateDetection, templateSegmentation);
+  images.mask = getSvgQuads(templateSize, templateDetection, templateSegmentation);
   const img = result.ImageFieldsBegin();
   for (; !img.Equals(result.ImageFieldsEnd()); img.Advance()) {
     const key = img.GetKey();
@@ -355,9 +350,7 @@ function getImageFields(result, templateSize, templateDetection, templateSegment
     images[key] = base64toBlob(field.GetValue().GetBase64String());
   }
 
-
   return images;
-
 }
 
 // Remove every 4 simbol in arr (remove alpha byte)
@@ -383,8 +376,7 @@ function removeAlphaChannel(data) {
   return rgbArr;
 }
 
-
-function getSvgQuads( result, templateSize, templateDetection, templateSegmentation) {
+function getSvgQuads(templateSize, templateDetection, templateSegmentation) {
 
   let areas = '';
   let fields = '';

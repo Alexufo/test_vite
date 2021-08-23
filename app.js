@@ -45,12 +45,12 @@ const _loader = reactive({
 const _resultData = reactive({
     images: null,
     data: null,
-    theme: [
+    docTypesOption: [
         { text: 'One', value: 'A' },
         { text: 'Two', value: 'B' },
         { text: 'Three', value: 'C' }
     ],
-    theme_selected: ''
+    docTypesSelected: ''
 });
 
 createApp({
@@ -104,7 +104,7 @@ async function main() {
     // video tag is nessedory to get video from webcam
     const video = document.createElement('video');
 
-    // access to camera
+    // access to camera  640x480 good for recognition/speed rate.
     async function setupCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -182,7 +182,7 @@ function cleanCanvas() {
     overlayCanvas.getContext('2d').clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 }
 function toCanvas(result) {
-
+    // if we replace canvas drawing to svg, we can calculate it inside worker.
     cleanCanvas();
     if (result?.templateDetection) {
         for (let i = 0; i < result.templateDetection.length; i++) {
@@ -287,10 +287,10 @@ function wasmEmitter(evenType) {
             break;
         case 'benchmark':
             _log.push(evenType.desc);
-
-            if (evenType.name === "Session Process") {
-                _log.performance = ": " + evenType.desc.split(":")[1];
-            }
+            _log.performance = evenType.name;
+            break;
+        case 'docTypes':
+            _resultData.docTypesOption = evenType.desc;
             break;
         case 'reset':
             _log.push('--- Session Reset ---');

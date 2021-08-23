@@ -83,10 +83,10 @@
                 <path d="M2 2L11 11L20 2" stroke="black" stroke-width="3" stroke-linecap="round" />
               </svg>
             </span>
-            <select>
-              <option>Cards</option>
-              <option>Barcode</option>
-              <option>All rus docs</option>
+            <select v-if="_resultData.docTypesOption.length > 0" v-model="_resultData.docTypesSelected">
+              <option v-for="option in _resultData.docTypesOption" v-bind:value="option.value">
+                {{ option.text }}
+              </option>
             </select>
           </div>
           <div class="main-preview-log" v-if="_log.logger.length" v-scope>
@@ -175,7 +175,7 @@
         </section>
       </div>
       <div class="main-result">
-        <h2 v-scope>Result{{_log.performance}}</h2>
+        <h2 v-scope>Result {{_log.performance}}</h2>
         <div class="main-body main-body--result">
           <div class="main-result-container custom--scroll" v-scope>
             <div class="main-result-img">
