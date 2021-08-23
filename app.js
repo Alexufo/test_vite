@@ -7,12 +7,11 @@ import { createApp, reactive } from "./js/petite-vue.es.js";
 // use <link rel="modulepreload" to preload workers. Cold start boost
 // https://web.dev/module-workers/
 // const SEWorker = new Worker('./bindings/idengine_worker', { type: 'module' });
-const SEWorker = new Worker('./bindings/idengine_worker');
+const SEWorker = new Worker('./bindings/idengine_worker.js');
 
 const canvas = document.querySelector('.js-main-canvas');
 const overlayCanvas = document.querySelector('.js-overlay-canvas');
 
-// 
 
 const _log = reactive({
     logger: [],
@@ -140,7 +139,7 @@ async function main() {
         }
     }
 
-    // await of camera init
+    // await of camera init 
     await setupCamera();
     video.play();
 
@@ -151,10 +150,9 @@ async function main() {
     canvas.width = overlayCanvas.width = videoWidth;
     canvas.height = overlayCanvas.height = videoHeight;
 
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.getContext('2d', { alpha: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
 
     function animate() {
-        // disable alpha channel!
         canvas.getContext('2d', { alpha: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
         requestAnimationFrame(animate);
     }
@@ -163,6 +161,7 @@ async function main() {
 
 main();
 
+
 function requestFrame() {
 
     // Show requested images by the wasm
@@ -170,53 +169,59 @@ function requestFrame() {
 
     return {
         requestType: 'frame',
-        imageData: canvas.getContext('2d', { alpha: false }).getImageData(0, 0, canvas.width, canvas.height),
+        imageData: canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height),
         width: canvas.width,
         height: canvas.height,
     };
 }
 
-function drawQuads(currentResult, cleanCanvas = false) {
 
+
+
+function cleanCanvas() {
     overlayCanvas.getContext('2d').clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+}
+function toCanvas(result) {
 
-    if (cleanCanvas) {
-        return;
-    }
-    if (currentResult?.templateDetection) {
-        for (let i = 0; i < currentResult.templateDetection.length; i++) {
-            const templatePoints = currentResult.templateDetection[i];
+    cleanCanvas();
+    if (result?.templateDetection) {
+        for (let i = 0; i < result.templateDetection.length; i++) {
+            const p = result.templateDetection[i];
             const path = new Path2D();
-            path.moveTo(templatePoints[0].x, templatePoints[0].y);
-            path.lineTo(templatePoints[1].x, templatePoints[1].y);
-            path.lineTo(templatePoints[2].x, templatePoints[2].y);
-            path.lineTo(templatePoints[3].x, templatePoints[3].y);
-            path.lineTo(templatePoints[0].x, templatePoints[0].y);
+            path.moveTo(p[0].x, p[0].y);
+            path.lineTo(p[1].x, p[1].y);
+            path.lineTo(p[2].x, p[2].y);
+            path.lineTo(p[3].x, p[3].y);
+            path.lineTo(p[0].x, p[0].y);
 
             overlayCanvas.getContext('2d').lineWidth = 2;
             overlayCanvas.getContext('2d').strokeStyle = 'red';
             overlayCanvas.getContext('2d').stroke(path);
         }
     }
-    if (currentResult?.templateSegmentation) {
-        for (let i = 0; i < currentResult.templateSegmentation.length; i++) {
-            const templatePoints = currentResult.templateSegmentation[i];
+
+    if (result?.templateSegmentation) {
+        for (let i = 0; i < result.templateSegmentation.length; i++) {
+            const p = result.templateSegmentation[i];
             const path = new Path2D();
-            path.moveTo(templatePoints[0].x, templatePoints[0].y);
-            path.lineTo(templatePoints[1].x, templatePoints[1].y);
-            path.lineTo(templatePoints[2].x, templatePoints[2].y);
-            path.lineTo(templatePoints[3].x, templatePoints[3].y);
-            path.lineTo(templatePoints[0].x, templatePoints[0].y);
+            path.moveTo(p[0].x, p[0].y);
+            path.lineTo(p[1].x, p[1].y);
+            path.lineTo(p[2].x, p[2].y);
+            path.lineTo(p[3].x, p[3].y);
+            path.lineTo(p[0].x, p[0].y);
+
             overlayCanvas.getContext('2d').lineWidth = 2;
             overlayCanvas.getContext('2d').strokeStyle = 'green';
             overlayCanvas.getContext('2d').stroke(path);
         }
 
     }
+
     // debug drawing
     console.log('%c ', `line-height:8rem;padding-right:25%;background:url(${overlayCanvas.toDataURL('image/jpeg', 1.0)}) top left / contain no-repeat`);
-
 }
+
+
 
 SEWorker.onmessage = function (msg) {
     switch (msg.data.requestType) {
@@ -228,27 +233,27 @@ SEWorker.onmessage = function (msg) {
 
         // processing result 
         case 'result':
-            let currentResult = msg.data;
+            let result = msg.data;
             _loader.btn_frame_active = false;
             _loader.btn_file_active = false;
 
             // timeout event
-            if (Object.keys(currentResult.data).length === 0) {
+            if (Object.keys(result.data).length === 0) {
                 _log.push('😕 Document Not found');
                 _loader.resetUI();
                 SEWorker.postMessage({ requestType: 'reset' });
                 return
             }
             // push to UI
-            _resultData.images = currentResult.images;
-            _resultData.data = currentResult.data;
+            _resultData.images = result.images;
+            _resultData.data = result.data;
 
             _log.push('👍 Document Ready');
             // get result
-            console.log(currentResult);
+            console.log(result);
 
             // Clear overlay canvas
-            drawQuads(null, true);
+            cleanCanvas();
 
             // reset session on result. Overwise you will always get result of latest document every request.
             SEWorker.postMessage({ requestType: 'reset' });
@@ -257,7 +262,7 @@ SEWorker.onmessage = function (msg) {
         // providing more images for recognition
         case 'FeedMeMore':
             _log.push('🥝 Feed Me More...');
-            drawQuads(msg.data);
+            toCanvas(msg.data);
             SEWorker.postMessage(requestFrame());
             break;
         // no default
@@ -281,7 +286,6 @@ function wasmEmitter(evenType) {
             _log.push('Version: ' + evenType.desc);
             break;
         case 'benchmark':
-            console.log(evenType);
             _log.push(evenType.desc);
 
             if (evenType.name === "Session Process") {

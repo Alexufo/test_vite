@@ -13,16 +13,17 @@ export default defineConfig({
       allow: ['..']
     }
   },
+
   plugins: [
     // other plugins...
-    eslintPlugin(),
+    // eslintPlugin(),
     crossOriginIsolation()
   ],
-
   build: {
-    //target: 'es2015',
-    //cssCodeSplit: false,
-    //minify: 'terser',
+    polyfillModulePreload: false,
+    target: 'esnext',
+    cssCodeSplit: false,
+    minify: false,
     rollupOptions: {
       output: {
         //entryFileNames: "[name].js",
