@@ -236,7 +236,13 @@ function checkSession(spawnedSession, IdEngineConfig) {
     req.send(`{"dynKey":"${dynKey}"}`);
 
     if (req.status === 200 & req.responseText.length > 0) {
-      spawnedSession.Activate(req.responseText); // sesson activation
+
+      const resp = JSON.parse(req.responseText);
+
+      if (resp.hasOwnProperty("actKey")) {
+        spawnedSession.Activate(resp.actKey); // sesson activation
+      }
+
     } else {
       postMessage({
         requestType: 'wasmEvent',
@@ -245,7 +251,6 @@ function checkSession(spawnedSession, IdEngineConfig) {
           desc: 'something wrong with activation server'
         }
       });
-      // throw Error('something wrong with activation server');
     }
 
   } catch (error) {
