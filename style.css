@@ -268,13 +268,20 @@ h2 {
       --w-480: 394px;
     }
 
-    &-select {
+    &-container {
       position: absolute;
       right: var(--div-body-p);
+      left: var(--div-body-p);
+      z-index: 2500;
+      display: flex;
+      justify-content: space-between;      
+    }
+
+    &-select {
+      position: relative;
+      min-width: 12ch;
       border-radius: var(--div-radius-1);
       overflow: hidden;
-      min-width: 12ch;
-      z-index: 2500;
 
       span {
         position: absolute;
@@ -301,8 +308,8 @@ h2 {
         font-size: 1rem;
         font-weight: bold;
         padding: 0.5rem 0.6rem;
-        border: none;
         width: 100%;
+        max-width: 20ch;
       }
     }
 
@@ -391,6 +398,7 @@ h2 {
     z-index: 500;
     max-width: calc(var(--div-body-p) * 2 + 100%);
     display: block;
+    height: attr(data-parent);
 
     &-overlay {
       position: absolute;
